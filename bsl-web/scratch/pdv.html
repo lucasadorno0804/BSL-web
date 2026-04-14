@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DETAIL_CORE POS - Fechamento</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-panel {
+      background: rgba(53, 53, 52, 0.7);
+      backdrop-filter: blur(20px);
+    }
+    .ignition-gradient {
+      background: linear-gradient(135deg, #E31B23 0%, #93000D 100%);
+    }
+    body {
+      background-color: #131313;
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#0079b9",
+            "surface-bright": "#3a3939",
+            "on-tertiary": "#003352",
+            "tertiary-fixed-dim": "#94ccff",
+            "surface-tint": "#ffb4ac",
+            "on-primary-fixed": "#410002",
+            "surface-dim": "#131313",
+            "surface-container-high": "#2a2a2a",
+            "surface-container": "#201f1f",
+            "inverse-on-surface": "#313030",
+            "surface-container-lowest": "#0e0e0e",
+            "error": "#ffb4ab",
+            "surface-container-low": "#1c1b1b",
+            "on-secondary-fixed-variant": "#474746",
+            "background": "#131313",
+            "secondary": "#c8c6c5",
+            "outline": "#ae8883",
+            "tertiary-fixed": "#cde5ff",
+            "outline-variant": "#5d3f3c",
+            "secondary-fixed-dim": "#c8c6c5",
+            "primary": "#ffb4ac",
+            "on-background": "#e5e2e1",
+            "on-error": "#690005",
+            "inverse-primary": "#c00015",
+            "tertiary": "#94ccff",
+            "secondary-fixed": "#e4e2e1",
+            "on-primary-fixed-variant": "#93000d",
+            "on-secondary-container": "#b6b5b4",
+            "secondary-container": "#474746",
+            "on-secondary": "#303030",
+            "surface": "#131313",
+            "primary-fixed": "#ffdad6",
+            "on-surface-variant": "#e7bdb8",
+            "inverse-surface": "#e5e2e1",
+            "on-primary": "#690006",
+            "on-surface": "#e5e2e1",
+            "error-container": "#93000a",
+            "primary-fixed-dim": "#ffb4ac",
+            "on-tertiary-fixed-variant": "#004b74",
+            "primary-container": "#e31b23",
+            "surface-container-highest": "#353534",
+            "on-primary-container": "#fff9f8",
+            "on-tertiary-container": "#f9faff",
+            "on-tertiary-fixed": "#001d32",
+            "on-error-container": "#ffdad6",
+            "on-secondary-fixed": "#1b1c1c",
+            "surface-variant": "#353534"
+          },
+          "borderRadius": {
+            "DEFAULT": "0px",
+            "lg": "0px",
+            "xl": "0px",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Inter"],
+            "body": ["Inter"],
+            "label": ["Space Grotesk"]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="overflow-hidden">
+<!-- SideNavBar -->
+<aside class="w-64 h-screen fixed left-0 top-0 border-r-0 bg-[#131313] flex flex-col py-8 px-0 z-50">
+<div class="px-6 mb-10">
+<div class="text-xl font-bold tracking-tighter text-[#E31B23]">PRECISION OPS</div>
+<div class="font-label text-[10px] tracking-[0.05em] text-white/40 mt-1 uppercase">V1.0.42</div>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center px-6 py-3 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mr-4" data-icon="dashboard">dashboard</span>
+<span class="font-label text-sm tracking-wider uppercase">Dashboard</span>
+</div>
+<div class="flex items-center px-6 py-3 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mr-4" data-icon="calendar_month">calendar_month</span>
+<span class="font-label text-sm tracking-wider uppercase">Agenda</span>
+</div>
+<div class="flex items-center px-6 py-3 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mr-4" data-icon="fact_check">fact_check</span>
+<span class="font-label text-sm tracking-wider uppercase">Inspeções</span>
+</div>
+<div class="flex items-center px-6 py-3 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mr-4" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label text-sm tracking-wider uppercase">Financeiro</span>
+</div>
+<div class="flex items-center px-6 py-3 text-[#FFFFFF] border-l-2 border-[#E31B23] bg-[#2A2A2A] font-bold cursor-pointer group">
+<span class="material-symbols-outlined mr-4" data-icon="point_of_sale">point_of_sale</span>
+<span class="font-label text-sm tracking-wider uppercase">Fechamento</span>
+</div>
+</nav>
+<div class="mt-auto px-6 space-y-4">
+<button class="w-full bg-primary-container text-white font-label text-xs tracking-widest py-4 px-2 hover:brightness-110 active:scale-95 transition-all duration-75">
+        NOVO SERVIÇO
+      </button>
+<div class="pt-6 space-y-2">
+<div class="flex items-center text-white/50 hover:text-white transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-lg mr-3" data-icon="settings">settings</span>
+<span class="font-label text-[11px] tracking-widest uppercase">Configurações</span>
+</div>
+<div class="flex items-center text-white/50 hover:text-white transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-lg mr-3" data-icon="help">help</span>
+<span class="font-label text-[11px] tracking-widest uppercase">Suporte</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-[#131313]/70 backdrop-blur-xl flex justify-between items-center h-16 px-12 ml-64">
+<div class="flex items-center gap-4">
+<span class="text-2xl font-black italic tracking-widest text-[#E31B23]">DETAIL_CORE</span>
+<span class="w-[1px] h-6 bg-surface-container-highest"></span>
+<span class="font-label text-xs tracking-[0.2em] text-on-surface-variant uppercase">PDV / Fechamento / Sessão #8294</span>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-6 text-white/80">
+<span class="material-symbols-outlined cursor-pointer hover:text-white" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-white" data-icon="engineering">engineering</span>
+</div>
+<div class="flex items-center gap-3 border-l border-surface-container-highest pl-8">
+<div class="text-right">
+<div class="text-[10px] font-label text-on-surface-variant uppercase tracking-tighter">Detailer Líder</div>
+<div class="text-xs font-bold text-white uppercase tracking-wider">M. Rossi</div>
+</div>
+<img class="w-8 h-8 object-cover border border-surface-container-highest" data-alt="professional portrait of a male technician in a clean dark uniform with subtle industrial background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGH0S68c4nw7XK2ykB0UgPIzWG4i1EizXvGquZ7jRbs8ZniB3wiNCj7L5cikvc9H6Q2Sj9GD89BPRPZ3VpnOzUACQjAxuysKmakERxpj2ZFhbB-IiRX9IOgyHFYM917hu1cGcnzg9GB_0S31oMkGjQ3gVAzOqK_YTnlMTgUYm_Re3dUHr_02UyCOMNoqcoAdaG83hYPd-WX5_yEbbo_H2UQrsk09qho9gGVnk-TPXgqjJvHa9PNiDVdKJHYtdMDi2mJ0xhoKu64wrp"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 mt-16 p-12 h-[calc(100vh-4rem)] overflow-y-auto bg-surface">
+<div class="grid grid-cols-12 gap-8 h-full">
+<!-- Left Column: Order Summary & Selection -->
+<div class="col-span-8 space-y-8">
+<!-- Customer Info Strip -->
+<section class="bg-surface-container-high p-8 flex justify-between items-center relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+<div class="flex gap-12">
+<div>
+<label class="block font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-1">Cliente</label>
+<div class="text-lg font-bold tracking-tight text-white uppercase">Jonathan Wick</div>
+</div>
+<div>
+<label class="block font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-1">Veículo</label>
+<div class="text-lg font-bold tracking-tight text-white uppercase">Ford Mustang GT (Dark Matter)</div>
+</div>
+<div>
+<label class="block font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-1">Placa</label>
+<div class="text-lg font-label font-medium text-tertiary tracking-widest uppercase">777-EXC</div>
+</div>
+</div>
+<div class="text-right">
+<span class="inline-block px-3 py-1 bg-tertiary-container/20 text-tertiary font-label text-[10px] tracking-[0.15em] uppercase border border-tertiary-container/30">Processo: Estágio 3</span>
+</div>
+</section>
+<!-- Services Performed Bento -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-headline font-bold text-2xl tracking-tighter uppercase">Serviços Realizados</h2>
+<span class="font-label text-[10px] text-on-surface-variant tracking-widest uppercase">Clique para alternar itens</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Service Card 1 -->
+<div class="bg-surface-container-low p-6 flex flex-col justify-between h-40 border-l-2 border-primary-container relative group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between">
+<span class="material-symbols-outlined text-primary-container" data-icon="flare">flare</span>
+<span class="font-label text-sm text-white">R$ 450,00</span>
+</div>
+<div>
+<h3 class="font-bold text-white tracking-tight uppercase">Vitrificação Ceramic Pro</h3>
+<p class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Nanotecnologia Permanente 9H</p>
+</div>
+<div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white/20" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+</div>
+<!-- Service Card 2 -->
+<div class="bg-surface-container-low p-6 flex flex-col justify-between h-40 border-l-2 border-surface-container-highest relative group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="directions_car">directions_car</span>
+<span class="font-label text-sm text-white">R$ 120,00</span>
+</div>
+<div>
+<h3 class="font-bold text-white tracking-tight uppercase">Interior de Precisão</h3>
+<p class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Limpeza a vapor + Hidratação de Couro</p>
+</div>
+<div class="absolute top-4 right-4 opacity-100">
+<span class="material-symbols-outlined text-primary-container" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Service Card 3 -->
+<div class="bg-surface-container-low p-6 flex flex-col justify-between h-40 border-l-2 border-surface-container-highest relative group cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="speed">speed</span>
+<span class="font-label text-sm text-white">R$ 85,00</span>
+</div>
+<div>
+<h3 class="font-bold text-white tracking-tight uppercase">Detalhamento de Cofre de Motor</h3>
+<p class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest mt-1">Desengorduramento + Protetor de Componentes</p>
+</div>
+<div class="absolute top-4 right-4 opacity-100">
+<span class="material-symbols-outlined text-primary-container" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Add Service Button -->
+<div class="bg-surface-container-lowest border border-dashed border-surface-container-highest p-6 flex flex-col items-center justify-center h-40 group cursor-pointer hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-surface-container-highest group-hover:text-primary-container mb-2 transition-colors" data-icon="add_circle">add_circle</span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-[0.2em] group-hover:text-white transition-colors">Anexar Serviço Extra</span>
+</div>
+</div>
+</section>
+<!-- Final Checklist -->
+<section class="bg-surface-container-low p-8">
+<h3 class="font-label text-xs tracking-[0.2em] text-on-surface-variant uppercase mb-6 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary-container"></span> Verificação Técnica
+           </h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest border-l-2 border-tertiary-container">
+<span class="font-label text-xs text-white uppercase tracking-wider">Certificação de Micragem da Pintura</span>
+<span class="material-symbols-outlined text-tertiary" data-icon="verified">verified</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-lowest border-l-2 border-tertiary-container">
+<span class="font-label text-xs text-white uppercase tracking-wider">Documentação Fotográfica Enviada</span>
+<span class="material-symbols-outlined text-tertiary" data-icon="photo_library">photo_library</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Billing & Receipt -->
+<div class="col-span-4 space-y-8">
+<div class="bg-surface-container-high p-8 flex flex-col h-full relative">
+<div class="flex items-center justify-between mb-8">
+<h2 class="font-headline font-black italic text-xl tracking-widest text-[#E31B23]">FATURAMENTO</h2>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="receipt_long">receipt_long</span>
+</div>
+<!-- Price Calculation -->
+<div class="space-y-4 flex-1">
+<div class="flex justify-between text-on-surface-variant font-label text-xs uppercase tracking-widest">
+<span>Subtotal</span>
+<span class="text-white">R$ 655,00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-label text-xs uppercase tracking-widest">
+<span>Impostos (8.5%)</span>
+<span class="text-white">R$ 55,68</span>
+</div>
+<!-- Discount Section -->
+<div class="py-4 border-y border-surface-container-highest my-6">
+<label class="block font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-3">Desconto / Cupom Promocional</label>
+<div class="flex gap-2">
+<input class="bg-surface-container-lowest border-none text-white font-label text-xs tracking-widest w-full py-3 px-4 focus:ring-1 focus:ring-primary-container" placeholder="INSERIR CÓDIGO" type="text"/>
+<button class="bg-surface-bright px-4 py-3 font-label text-[10px] tracking-widest uppercase text-white hover:bg-white/10">APLICAR</button>
+</div>
+<div class="mt-3 flex items-center justify-between">
+<span class="font-label text-[10px] text-tertiary tracking-widest uppercase">Nível de Fidelidade 2 (10%)</span>
+<span class="font-label text-xs text-tertiary">-R$ 65,50</span>
+</div>
+</div>
+<!-- Total -->
+<div class="pt-4">
+<div class="flex justify-between items-end">
+<div>
+<div class="font-label text-[10px] text-on-surface-variant tracking-widest uppercase">Valor Total Devido</div>
+<div class="text-4xl font-black tracking-tighter text-white mt-1">R$ 645,18</div>
+</div>
+<div class="text-right">
+<span class="block font-label text-[10px] text-primary-container tracking-widest uppercase">Status do Pagamento</span>
+<span class="block font-bold text-xs uppercase text-white">Pendente</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="mt-12 space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-surface-container-highest py-4 font-label text-[11px] tracking-widest text-white uppercase hover:brightness-125 transition-all">
+<span class="material-symbols-outlined text-lg align-middle mr-2" data-icon="print">print</span> Imprimir
+              </button>
+<button class="bg-surface-container-highest py-4 font-label text-[11px] tracking-widest text-white uppercase hover:brightness-125 transition-all">
+<span class="material-symbols-outlined text-lg align-middle mr-2" data-icon="mail">mail</span> E-mail
+              </button>
+</div>
+<button class="w-full ignition-gradient py-6 font-headline font-bold text-sm tracking-[0.2em] text-white uppercase hover:brightness-110 active:scale-[0.98] transition-all">
+              Concluir Pagamento
+            </button>
+<!-- CTA requested -->
+<button class="w-full border-2 border-[#E31B23] bg-transparent py-4 font-label text-[10px] tracking-[0.25em] text-[#E31B23] font-bold uppercase hover:bg-[#E31B23] hover:text-white transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="send">send</span>
+              Enviar Aviso de Carro Pronto via WhatsApp
+            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Overlay Modal Simulation (HUD Style) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-12 bg-black/80 backdrop-blur-md">
+<div class="glass-panel w-full max-w-2xl p-12 relative">
+<div class="absolute top-0 left-0 w-full h-[2px] bg-primary-container"></div>
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-headline font-black text-3xl tracking-tighter uppercase italic">Recibo Emitido</h2>
+<p class="font-label text-xs text-on-surface-variant tracking-widest uppercase mt-2">Transação #DET-4001928-X</p>
+</div>
+<span class="material-symbols-outlined text-primary-container text-4xl" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="bg-surface-container-lowest p-8 border border-white/5 space-y-6">
+<div class="flex justify-between">
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Assinatura do Técnico</span>
+<span class="font-label text-[10px] text-white uppercase tracking-widest font-bold">M. ROSSI [DIGITAL]</span>
+</div>
+<div class="h-[1px] bg-white/10 w-full"></div>
+<div class="flex justify-between">
+<span class="font-label text-[10px] text-on-surface-variant uppercase tracking-widest">Data/Hora</span>
+<span class="font-label text-[10px] text-white uppercase tracking-widest font-bold">2023-10-27 14:42:01 PST</span>
+</div>
+</div>
+<div class="mt-12 flex gap-4">
+<button class="flex-1 ignition-gradient py-4 font-label text-xs tracking-widest text-white uppercase">Fechar Painel</button>
+<button class="flex-1 bg-surface-bright py-4 font-label text-xs tracking-widest text-white uppercase">Nova Inspeção</button>
+</div>
+</div>
+</div>
+</body></html>

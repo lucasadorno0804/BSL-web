@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestão Financeira | PRECISION OPS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&amp;family=Space+Grotesk:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#0079b9",
+                        "surface-bright": "#3a3939",
+                        "on-tertiary": "#003352",
+                        "tertiary-fixed-dim": "#94ccff",
+                        "surface-tint": "#ffb4ac",
+                        "on-primary-fixed": "#410002",
+                        "surface-dim": "#131313",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-container": "#201f1f",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-lowest": "#0e0e0e",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-fixed-variant": "#474746",
+                        "background": "#131313",
+                        "secondary": "#c8c6c5",
+                        "outline": "#ae8883",
+                        "tertiary-fixed": "#cde5ff",
+                        "outline-variant": "#5d3f3c",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "primary": "#ffb4ac",
+                        "on-background": "#e5e2e1",
+                        "on-error": "#690005",
+                        "inverse-primary": "#c00015",
+                        "tertiary": "#94ccff",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-primary-fixed-variant": "#93000d",
+                        "on-secondary-container": "#b6b5b4",
+                        "secondary-container": "#474746",
+                        "on-secondary": "#303030",
+                        "surface": "#131313",
+                        "primary-fixed": "#ffdad6",
+                        "on-surface-variant": "#e7bdb8",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary": "#690006",
+                        "on-surface": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb4ac",
+                        "on-tertiary-fixed-variant": "#004b74",
+                        "primary-container": "#e31b23",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#fff9f8",
+                        "on-tertiary-container": "#f9faff",
+                        "on-tertiary-fixed": "#001d32",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-variant": "#353534"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-ignition {
+            background: linear-gradient(135deg, #e31b23 0%, #93000d 100%);
+        }
+        .tracking-technical {
+            letter-spacing: 0.05em;
+        }
+        .tracking-headline {
+            letter-spacing: 0.02em;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131313;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-white">
+<!-- SideNavBar Shell -->
+<aside class="flex flex-col h-full py-8 px-0 w-64 h-screen fixed left-0 top-0 bg-[#131313] z-50">
+<div class="px-6 mb-12">
+<h1 class="text-xl font-bold tracking-tighter text-[#E31B23]">PRECISION OPS</h1>
+<p class="font-label text-[10px] text-on-surface-variant/50 tracking-widest mt-1">V1.0.42</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-4 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="dashboard">dashboard</span>
+<span class="font-label text-sm uppercase">Painel</span>
+</a>
+<a class="flex items-center px-6 py-4 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="calendar_month">calendar_month</span>
+<span class="font-label text-sm uppercase">Agenda</span>
+</a>
+<a class="flex items-center px-6 py-4 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="fact_check">fact_check</span>
+<span class="font-label text-sm uppercase">Inspeções</span>
+</a>
+<!-- Active State: Financials -->
+<a class="flex items-center px-6 py-4 text-[#FFFFFF] border-l-2 border-[#E31B23] bg-[#2A2A2A] font-bold group" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label text-sm uppercase">Financeiro</span>
+</a>
+<a class="flex items-center px-6 py-4 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors group" href="#">
+<span class="material-symbols-outlined mr-4" data-icon="point_of_sale">point_of_sale</span>
+<span class="font-label text-sm uppercase">Checkout</span>
+</a>
+</nav>
+<div class="px-6 mb-8">
+<button class="w-full bg-ignition py-4 text-white font-label font-bold text-xs tracking-widest active:scale-95 transition-all duration-75">
+                NOVO SERVIÇO
+            </button>
+</div>
+<footer class="mt-auto space-y-1">
+<a class="flex items-center px-6 py-3 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4 text-sm" data-icon="settings">settings</span>
+<span class="font-label text-xs uppercase">Configurações</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#FFFFFF]/70 hover:text-[#FFFFFF] hover:bg-[#2A2A2A]/50 transition-colors" href="#">
+<span class="material-symbols-outlined mr-4 text-sm" data-icon="help">help</span>
+<span class="font-label text-xs uppercase">Suporte</span>
+</a>
+</footer>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-[#131313]/70 backdrop-blur-xl flex justify-between items-center h-16 px-12">
+<div class="flex items-center space-x-4">
+<span class="text-2xl font-black italic tracking-widest text-[#E31B23]">DETAIL_CORE</span>
+<span class="h-4 w-[1px] bg-outline-variant/30"></span>
+<span class="font-label text-[10px] text-on-surface-variant tracking-technical">FINANCIAL_REPORTS_SECURE</span>
+</div>
+<div class="flex items-center space-x-8">
+<div class="hidden xl:flex items-center bg-surface-container-lowest px-4 py-2 border-l-2 border-primary-container">
+<span class="material-symbols-outlined text-sm mr-2 text-primary-container" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-[10px] font-label text-on-surface tracking-widest w-48 uppercase" placeholder="BUSCAR TRANSAÇÕES..." type="text"/>
+</div>
+<div class="flex items-center space-x-6">
+<span class="material-symbols-outlined text-white/80 hover:text-white cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-white/80 hover:text-white cursor-pointer" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined text-white/80 hover:text-white cursor-pointer" data-icon="engineering">engineering</span>
+<div class="flex items-center space-x-3 ml-4 border-l border-outline-variant/20 pl-6">
+<div class="text-right">
+<p class="text-[10px] font-bold font-label text-white leading-none">MARCUS V.</p>
+<p class="text-[8px] font-label text-primary-container tracking-widest">DETALHADOR LÍDER</p>
+</div>
+<img alt="Lead Detailer" class="w-8 h-8 grayscale contrast-125" data-alt="Close-up portrait of a professional automotive technician in dark uniform against a technical workshop background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbZkihtoX-8CoGOZQ9eG06FhGusz0FyXzUCwiWnTwNOGrPXGLjHcSwBIwjlrb4fuecfrSU7E940Rpdf3GmGL6BAP_TqpB9NOJser3sHtWitd7Xom2a0cky4W-EiqvHj99L1VQqooqLR2FDePYqy_M4gu6IOAk-vSEA3CWtuwtHPHLWFDEdWot1aQJNpD1slds5Xj3DtS8gN4QBjc2RHPKehO9E5BUiiT4dhsrGm72bsMa_Mq7BSYusSQqQvCGGpI2njuaLI4FBJo3U"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-12 min-h-screen bg-surface">
+<!-- Hero Financial Stats -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-0 mb-12 border-l border-outline-variant/10">
+<div class="p-8 bg-surface-container-low">
+<p class="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Receita Total (MTD)</p>
+<div class="flex items-end justify-between">
+<h2 class="text-3xl font-black tracking-tight text-white">$42,890.00</h2>
+<span class="text-[10px] font-label text-tertiary bg-tertiary/10 px-2 py-1">+12.4%</span>
+</div>
+</div>
+<div class="p-8 bg-surface-container-high">
+<p class="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Comissões Pendentes</p>
+<div class="flex items-end justify-between">
+<h2 class="text-3xl font-black tracking-tight text-primary-container">$8,412.50</h2>
+<span class="material-symbols-outlined text-primary-container" data-icon="hourglass_empty">hourglass_empty</span>
+</div>
+</div>
+<div class="p-8 bg-surface-container-low">
+<p class="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Despesas Operacionais</p>
+<div class="flex items-end justify-between">
+<h2 class="text-3xl font-black tracking-tight text-white">$12,140.22</h2>
+<span class="text-[10px] font-label text-error bg-error/10 px-2 py-1">ALUGUEL/SUPRIMENTOS</span>
+</div>
+</div>
+<div class="p-8 bg-surface-container-high">
+<p class="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Fluxo de Caixa Líquido</p>
+<div class="flex items-end justify-between">
+<h2 class="text-3xl font-black tracking-tight text-white">$22,337.28</h2>
+<span class="material-symbols-outlined text-tertiary" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Left Column: Transaction Logging -->
+<div class="lg:col-span-4 space-y-12">
+<section>
+<h3 class="font-headline font-bold text-lg tracking-headline mb-8 border-l-4 border-primary-container pl-4">LANÇAR_DESPESA</h3>
+<div class="bg-surface-container-lowest p-8 space-y-6">
+<div>
+<label class="font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-2 block">Categoria</label>
+<select class="w-full bg-surface-container-low border-none text-white font-label text-sm py-4 px-4 focus:ring-0 appearance-none">
+<option>PRODUTOS &amp; QUÍMICOS</option>
+<option>MANUTENÇÃO DE EQUIPAMENTOS</option>
+<option>ALUGUEL &amp; UTILIDADES</option>
+<option>MARKETING</option>
+</select>
+</div>
+<div>
+<label class="font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-2 block">Valor (BRL)</label>
+<div class="flex">
+<div class="bg-surface-container-high px-4 flex items-center border-l-2 border-primary-container">
+<span class="text-xs text-white/50">R$</span>
+</div>
+<input class="flex-1 bg-surface-container-low border-none text-white font-label text-lg py-4 px-4 focus:ring-0" placeholder="0,00" type="text"/>
+</div>
+</div>
+<button class="w-full bg-surface-bright py-4 text-white font-label font-bold text-xs tracking-widest hover:bg-surface-container-highest transition-colors uppercase">
+                            Confirmar Lançamento
+                        </button>
+</div>
+</section>
+<section>
+<h3 class="font-headline font-bold text-lg tracking-headline mb-8 border-l-4 border-tertiary pl-4">ENTRADA_DE_CAIXA</h3>
+<div class="bg-surface-container-high p-8">
+<div class="grid grid-cols-3 gap-4 mb-8">
+<button class="bg-surface-container-lowest py-6 flex flex-col items-center justify-center border-l border-tertiary hover:bg-surface-bright transition-all">
+<span class="material-symbols-outlined text-tertiary mb-2" data-icon="qr_code_2">qr_code_2</span>
+<span class="font-label text-[10px] tracking-widest">PIX</span>
+</button>
+<button class="bg-surface-container-lowest py-6 flex flex-col items-center justify-center opacity-50 hover:opacity-100 transition-all">
+<span class="material-symbols-outlined text-white mb-2" data-icon="credit_card">credit_card</span>
+<span class="font-label text-[10px] tracking-widest">CARTÃO</span>
+</button>
+<button class="bg-surface-container-lowest py-6 flex flex-col items-center justify-center opacity-50 hover:opacity-100 transition-all">
+<span class="material-symbols-outlined text-white mb-2" data-icon="payments">payments</span>
+<span class="font-label text-[10px] tracking-widest">DINHEIRO</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest p-6 flex items-center justify-between">
+<span class="font-label text-[10px] text-on-surface-variant uppercase">Volume Diário Pix</span>
+<span class="font-label text-sm text-tertiary font-bold">R$ 3.120,00</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Data Visualization & Lists -->
+<div class="lg:col-span-8">
+<!-- Commission Tracking Table -->
+<section class="mb-12">
+<div class="flex justify-between items-end mb-8">
+<h3 class="font-headline font-bold text-lg tracking-headline border-l-4 border-on-tertiary-fixed-variant pl-4">MATRIZ_DE_COMISSÕES</h3>
+<p class="font-label text-[10px] text-on-surface-variant uppercase tracking-technical">Período: Outubro 2023</p>
+</div>
+<div class="overflow-hidden border border-outline-variant/10">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest font-label text-[10px] tracking-widest text-on-surface-variant uppercase">
+<th class="p-6 font-medium">Técnico</th>
+<th class="p-6 font-medium">Tipo de Serviço</th>
+<th class="p-6 font-medium text-right">Valor Base</th>
+<th class="p-6 font-medium text-right">Taxa</th>
+<th class="p-6 font-medium text-right text-primary-container">Comissão</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10 font-body text-sm">
+<tr class="bg-surface hover:bg-surface-container-low transition-colors">
+<td class="p-6">
+<div class="flex items-center space-x-3">
+<div class="w-2 h-2 bg-tertiary"></div>
+<span class="font-bold tracking-tight text-white">Alex Rivera</span>
+</div>
+</td>
+<td class="p-6 font-label text-xs text-on-surface-variant">CERAMIC_COATING_X2</td>
+<td class="p-6 text-right font-label tracking-technical text-white/80">R$ 1.200,00</td>
+<td class="p-6 text-right font-label text-xs">15%</td>
+<td class="p-6 text-right font-bold text-primary-container tracking-tight">R$ 180,00</td>
+</tr>
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="p-6">
+<div class="flex items-center space-x-3">
+<div class="w-2 h-2 bg-tertiary"></div>
+<span class="font-bold tracking-tight text-white">Jordan Smith</span>
+</div>
+</td>
+<td class="p-6 font-label text-xs text-on-surface-variant">INTERIOR_RESTORATION</td>
+<td class="p-6 text-right font-label tracking-technical text-white/80">R$ 450,00</td>
+<td class="p-6 text-right font-label text-xs">20%</td>
+<td class="p-6 text-right font-bold text-primary-container tracking-tight">R$ 90,00</td>
+</tr>
+<tr class="bg-surface hover:bg-surface-container-low transition-colors">
+<td class="p-6">
+<div class="flex items-center space-x-3">
+<div class="w-2 h-2 bg-tertiary"></div>
+<span class="font-bold tracking-tight text-white">Alex Rivera</span>
+</div>
+</td>
+<td class="p-6 font-label text-xs text-on-surface-variant">FULL_DETAIL_V8</td>
+<td class="p-6 text-right font-label tracking-technical text-white/80">R$ 850,00</td>
+<td class="p-6 text-right font-label text-xs">15%</td>
+<td class="p-6 text-right font-bold text-primary-container tracking-tight">R$ 127,50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Visual Telemetry: Cash Flow Chart Mockup -->
+<section>
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-headline font-bold text-lg tracking-headline border-l-4 border-tertiary pl-4">ANÁLISE_DE_FLUXO</h3>
+<div class="flex space-x-2">
+<span class="w-2 h-2 bg-tertiary"></span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase mr-4">Entrada</span>
+<span class="w-2 h-2 bg-primary-container"></span>
+<span class="font-label text-[10px] text-on-surface-variant uppercase">Saída</span>
+</div>
+</div>
+<div class="h-64 bg-surface-container-lowest p-8 relative flex items-end justify-between space-x-4">
+<div class="absolute inset-0 p-8 flex flex-col justify-between pointer-events-none opacity-10">
+<div class="w-full h-[1px] bg-white"></div>
+<div class="w-full h-[1px] bg-white"></div>
+<div class="w-full h-[1px] bg-white"></div>
+<div class="w-full h-[1px] bg-white"></div>
+</div>
+<!-- Pseudo Bars -->
+<div class="flex flex-col justify-end w-full space-y-1 group">
+<div class="w-full bg-primary-container/20 h-12 hover:bg-primary-container transition-all"></div>
+<div class="w-full bg-tertiary h-32 hover:bg-tertiary-fixed-dim transition-all"></div>
+<p class="font-label text-[8px] text-center mt-2 text-on-surface-variant">SEG</p>
+</div>
+<div class="flex flex-col justify-end w-full space-y-1 group">
+<div class="w-full bg-primary-container/20 h-16 hover:bg-primary-container transition-all"></div>
+<div class="w-full bg-tertiary h-24 hover:bg-tertiary-fixed-dim transition-all"></div>
+<p class="font-label text-[8px] text-center mt-2 text-on-surface-variant">TER</p>
+</div>
+<div class="flex flex-col justify-end w-full space-y-1 group">
+<div class="w-full bg-primary-container/20 h-8 hover:bg-primary-container transition-all"></div>
+<div class="w-full bg-tertiary h-40 hover:bg-tertiary-fixed-dim transition-all"></div>
+<p class="font-label text-[8px] text-center mt-2 text-on-surface-variant">QUA</p>
+</div>
+<div class="flex flex-col justify-end w-full space-y-1 group">
+<div class="w-full bg-primary-container/20 h-24 hover:bg-primary-container transition-all"></div>
+<div class="w-full bg-tertiary h-36 hover:bg-tertiary-fixed-dim transition-all"></div>
+<p class="font-label text-[8px] text-center mt-2 text-on-surface-variant">QUI</p>
+</div>
+<div class="flex flex-col justify-end w-full space-y-1 group">
+<div class="w-full bg-primary-container/20 h-20 hover:bg-primary-container transition-all"></div>
+<div class="w-full bg-tertiary h-48 hover:bg-tertiary-fixed-dim transition-all"></div>
+<p class="font-label text-[8px] text-center mt-2 text-on-surface-variant">SEX</p>
+</div>
+<div class="flex flex-col justify-end w-full space-y-1 group">
+<div class="w-full bg-primary-container/20 h-32 hover:bg-primary-container transition-all"></div>
+<div class="w-full bg-tertiary h-56 hover:bg-tertiary-fixed-dim transition-all"></div>
+<p class="font-label text-[8px] text-center mt-2 text-on-surface-variant">SAB</p>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- System Status Footer Overlay -->
+<div class="mt-16 flex items-center justify-between border-t border-outline-variant/10 pt-8 opacity-50">
+<div class="flex space-x-12">
+<div>
+<p class="font-label text-[10px] tracking-widest uppercase mb-1">Status do Banco de Dados</p>
+<p class="text-[10px] font-bold text-tertiary uppercase">Sincronizado // Cloud-Sec</p>
+</div>
+<div>
+<p class="font-label text-[10px] tracking-widest uppercase mb-1">Integridade do Razão</p>
+<p class="text-[10px] font-bold text-white uppercase">Verificado 100%</p>
+</div>
+</div>
+<p class="font-label text-[10px] tracking-widest uppercase">Precision Detail Financial Core v1.4.2</p>
+</div>
+</main>
+</body></html>
