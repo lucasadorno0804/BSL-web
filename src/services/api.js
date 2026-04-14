@@ -1,4 +1,4 @@
-const BASE_URL = 'https://api-rsbf.onrender.com';
+const BASE_URL = 'https://api-rsbf.onrender.com/api';
 
 export const api = {
   async get(endpoint) {
