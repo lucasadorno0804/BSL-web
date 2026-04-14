@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'https://api-rsbf.onrender.com';
 
 export const api = {
   async get(endpoint) {
@@ -34,7 +34,7 @@ export const api = {
 
   async request(endpoint, options) {
     const token = localStorage.getItem('@BSL:token');
-    
+
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
