@@ -4,7 +4,13 @@ console.log("apiUrl", apiUrl);
 
 export const api = {
   async get(endpoint) {
-    return this.request(endpoint, { method: 'GET' });
+
+    try {
+      return this.request(endpoint, { method: 'GET' });
+    }
+    catch (error) {
+      console.log(error);
+    }
   },
 
   async post(endpoint, data) {
