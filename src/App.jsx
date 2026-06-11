@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import RotaPrivada from './components/RotaPrivada';
 import BaseLayout from './components/layout/BaseLayout';
 
 // Pages
@@ -22,7 +22,7 @@ export default function App() {
           <Route path="/cadastro" element={<Register />} />
           
           {/* Rotas Protegidas envolvidas pelo BaseLayout */}
-          <Route path="/" element={<ProtectedRoute><BaseLayout /></ProtectedRoute>}>
+          <Route path="/" element={<RotaPrivada><BaseLayout /></RotaPrivada>}>
             <Route index element={<Navigate to="/painel" replace />} />
             <Route path="painel" element={<Dashboard />} />
             <Route path="agenda" element={<Schedule />} />
