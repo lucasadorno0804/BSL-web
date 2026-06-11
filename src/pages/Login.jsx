@@ -6,17 +6,26 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (isLoading) return;
+    
     setError('');
+    setIsLoading(true);
+    
     try {
       await login(email, password);
-      navigate('/painel');
+      // Se tiver sucesso, navegamos para o painel.
+      // NÃO chamamos setIsLoading(false) aqui porque o componente será desmontado.
+      navigate('/painel', { replace: true });
     } catch (err) {
       setError(err.message);
+      setIsLoading(false); // Só volta a habilitar o botão se der erro
     }
   };
 
@@ -44,7 +53,8 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-[#2A2A2A] text-white border-0 py-3 px-4 font-label focus:ring-1 focus:ring-[#E31B23] focus:outline-none transition-shadow"
+              disabled={isLoading}
+              className="w-full bg-[#2A2A2A] text-white border-0 py-3 px-4 font-label focus:ring-1 focus:ring-[#E31B23] focus:outline-none transition-shadow disabled:opacity-50"
               placeholder="admin@bsl.com"
             />
           </div>
@@ -58,16 +68,18 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full bg-[#2A2A2A] text-white border-0 py-3 px-4 font-label focus:ring-1 focus:ring-[#E31B23] focus:outline-none transition-shadow"
+              disabled={isLoading}
+              className="w-full bg-[#2A2A2A] text-white border-0 py-3 px-4 font-label focus:ring-1 focus:ring-[#E31B23] focus:outline-none transition-shadow disabled:opacity-50"
               placeholder="••••••••"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#E31B23] text-white font-black italic tracking-widest py-4 hover:bg-[#c2161c] transition-colors mt-4"
+            disabled={isLoading}
+            className="w-full bg-[#E31B23] text-white font-black italic tracking-widest py-4 hover:bg-[#c2161c] transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ENTRAR
+            {isLoading ? 'ENTRANDO...' : 'ENTRAR'}
           </button>
         </form>
 
