@@ -1,122 +1,239 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
+import { BarChart, Bar, ResponsiveContainer, Tooltip, Cell } from 'recharts';
+
+const SkeletonCard = ({ height = 'h-40', extraClasses = '' }) => (
+  <div className={`w-full bg-surface-container-highest animate-pulse ${height} ${extraClasses}`}></div>
+);
 
 export default function Dashboard() {
+  const [occupancy, setOccupancy] = useState(null);
+  const [revenue, setRevenue] = useState(null);
+  const [upcoming, setUpcoming] = useState(null);
+  const [finished, setFinished] = useState(null);
+  const navigate = useNavigate();
+
+  const fetchDashboardData = () => {
+    api.get('/dashboard/occupancy').then(setOccupancy).catch(console.error);
+    api.get('/dashboard/revenue-today').then(setRevenue).catch(console.error);
+    api.get('/dashboard/upcoming-services').then(setUpcoming).catch(console.error);
+    api.get('/dashboard/finished-services').then(setFinished).catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 30000); // Atualiza a cada 30 segundos
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleStatusChange = async (appId, newStatus) => {
+    try {
+      await api.patch(`/schedule/appointments/${appId}`, { status: newStatus });
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+
+
   return (
-    <div className="px-12 py-8">
+    <div className="px-12 py-8 h-screen overflow-y-auto bg-surface relative z-10">
       {/* Dashboard Header */}
       <div className="flex justify-between items-end mb-12">
         <div>
           <p className="font-label text-primary-container text-xs tracking-[0.2em] font-bold mb-2">STATUS_DO_SISTEMA: OTIMIZADO</p>
           <h2 className="text-5xl font-black tracking-tight text-white uppercase">Batimento <span className="text-primary-container">Operacional</span></h2>
         </div>
-        <div className="text-right">
-          <p className="font-label text-on-surface/40 text-xs tracking-widest">TIMESTAMP_SESSAO_ATUAL</p>
-          <p className="text-xl font-bold font-label">24 OUT 2023 // 14:42:09</p>
+        <div className="text-right hidden md:block">
+          <p className="font-label text-on-surface-variant text-xs tracking-widest">TIMESTAMP_SESSAO</p>
+          <p className="text-xl font-bold font-label text-white uppercase">LIVE</p>
         </div>
       </div>
 
       {/* Bento Grid Metrics */}
       <div className="grid grid-cols-12 gap-6 mb-12">
+        
         {/* Total Cars in Yard */}
-        <div className="col-span-12 md:col-span-4 bg-surface-container-high p-8 flex flex-col justify-between group hover:bg-surface-bright transition-all duration-300">
+        <div className="col-span-12 md:col-span-6 bg-surface-container-high p-8 flex flex-col justify-between group hover:bg-surface-bright transition-all duration-300 min-h-[240px]">
           <div className="flex justify-between items-start">
-            <span className="font-label text-xs tracking-widest text-on-surface/50 uppercase">Ocupação_da_Oficina</span>
+            <span className="font-label text-xs tracking-widest text-on-surface-variant uppercase">Ocupação_da_Oficina</span>
             <span className="material-symbols-outlined text-primary-container">directions_car</span>
           </div>
-          <div className="mt-8">
-            <p className="text-7xl font-black text-white tracking-tighter">14<span className="text-2xl text-on-surface/30 font-light tracking-normal ml-2">/ 20</span></p>
-            <p className="font-label text-sm text-on-surface/60 mt-2 uppercase">Veículos em Processamento</p>
-          </div>
-          <div className="mt-6 w-full bg-surface-container-lowest h-1">
-            <div className="bg-primary-container h-full w-[70%]"></div>
-          </div>
+          {occupancy ? (
+            <div className="mt-8 animate-fade-in">
+              <p className="text-7xl font-black text-white tracking-tighter">
+                {occupancy.current}
+                <span className="text-2xl text-on-surface-variant font-light tracking-normal ml-2">/ {occupancy.capacity}</span>
+              </p>
+              <p className="font-label text-sm text-on-surface-variant mt-2 uppercase">Veículos em Processamento</p>
+              <div className="mt-6 w-full bg-surface-container-lowest h-1">
+                <div 
+                  className="bg-primary-container h-full transition-all duration-1000 ease-out" 
+                  style={{ width: `${occupancy.percentage}%` }}
+                ></div>
+              </div>
+            </div>
+          ) : (
+            <SkeletonCard height="h-24" extraClasses="mt-8" />
+          )}
         </div>
 
         {/* Daily Revenue */}
-        <div className="col-span-12 md:col-span-5 bg-surface-container-high p-8 group hover:bg-surface-bright transition-all duration-300">
-          <div className="flex justify-between items-start mb-12">
-            <span className="font-label text-xs tracking-widest text-on-surface/50 uppercase">Fluxo_de_Receita_Diário</span>
+        <div className="col-span-12 md:col-span-6 bg-surface-container-high p-8 group hover:bg-surface-bright transition-all duration-300 min-h-[240px] flex flex-col">
+          <div className="flex justify-between items-start mb-6">
+            <span className="font-label text-xs tracking-widest text-on-surface-variant uppercase">Fluxo_de_Receita_Diário</span>
             <span className="material-symbols-outlined text-tertiary">monitoring</span>
           </div>
-          <div className="flex items-baseline space-x-4">
-            <p className="text-6xl font-black text-white tracking-tighter">R$ 4.280,00</p>
-            <p className="text-tertiary font-label text-sm font-bold">+12,4%</p>
-          </div>
-          <div className="mt-4 flex space-x-1 items-end h-16">
-             {/* Mock de barras - Pode ser feito com recharts dps */}
-            <div className="flex-1 bg-surface-container-lowest h-[40%]"></div>
-            <div className="flex-1 bg-surface-container-lowest h-[60%]"></div>
-            <div className="flex-1 bg-surface-container-lowest h-[55%]"></div>
-            <div className="flex-1 bg-surface-container-lowest h-[80%]"></div>
-            <div className="flex-1 bg-primary-container h-[95%]"></div>
-            <div className="flex-1 bg-surface-container-lowest h-[30%] opacity-20"></div>
-            <div className="flex-1 bg-surface-container-lowest h-[45%] opacity-20"></div>
-          </div>
+          {revenue ? (
+            <div className="flex-1 flex flex-col animate-fade-in">
+              <div className="flex items-baseline space-x-4 mb-4">
+                <p className="text-6xl font-black text-white tracking-tighter">{formatCurrency(revenue.today)}</p>
+                <p className={`font-label text-sm font-bold ${revenue.variation >= 0 ? 'text-tertiary' : 'text-[#E31B23]'}`}>
+                  {revenue.variation > 0 ? '+' : ''}{revenue.variation}%
+                </p>
+              </div>
+              <div className="flex-1 w-full h-16 mt-auto">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenue.chartData}>
+                    <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ backgroundColor: '#1E1E1E', border: 'none', color: '#FFF' }} />
+                    <Bar dataKey="value" fill="#E31B23" radius={[2, 2, 0, 0]}>
+                      {revenue.chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={index === revenue.chartData.length - 1 ? '#E31B23' : '#333'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          ) : (
+            <SkeletonCard height="flex-1" extraClasses="mt-2" />
+          )}
         </div>
 
-        {/* Monthly Goals */}
-        <div className="col-span-12 md:col-span-3 bg-surface-container-lowest p-8 flex flex-col justify-center border-l-4 border-primary-container">
-          <span className="font-label text-xs tracking-widest text-on-surface/50 uppercase mb-4">Conclusão_da_Cota</span>
-          <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
-             <span className="text-2xl font-black text-white z-10">82%</span>
-            <svg className="w-full h-full transform -rotate-90 absolute">
-              <circle className="text-surface-container-high" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeWidth="8"></circle>
-              {/* Note: strokeDashoffset depends on real values */}
-              <circle className="text-primary-container" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeDasharray="364.4" strokeDashoffset="65.6" strokeWidth="8"></circle>
-            </svg>
-          </div>
-          <p className="text-center font-label text-[10px] tracking-widest text-on-surface/40 mt-4 uppercase">Meta: R$ 85.000,00</p>
-        </div>
+
       </div>
 
       <div className="grid grid-cols-12 gap-8">
-        <div className="col-span-12 lg:col-span-8">
+        <div className="col-span-12 lg:col-span-12">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-label text-sm font-bold tracking-[0.3em] text-white uppercase">Próximos_Serviços</h3>
-            <button className="text-xs font-label text-primary-container hover:underline tracking-widest">VER_ESCALA_COMPLETA</button>
           </div>
           
           <div className="space-y-4">
-             {/* Mock item 1 */}
-            <div className="bg-surface-container-high flex items-center p-6 group cursor-pointer transition-all hover:bg-surface-bright">
-              <div className="w-20 font-label">
-                <p className="text-xs text-on-surface/40 uppercase">Hora</p>
-                <p className="text-lg font-bold text-white">15:00</p>
-              </div>
-              <div className="flex-1 px-8">
-                <p className="font-label text-[10px] text-tertiary-fixed-dim tracking-widest uppercase mb-1">Vitrificação_Cerâmica</p>
-                <h4 className="text-xl font-black tracking-tight text-white">2024 PORSCHE 911 GT3 RS</h4>
-              </div>
-              <div className="text-right">
-                <div className="bg-surface-container-lowest px-4 py-2 text-[10px] font-label font-bold tracking-widest text-on-surface/60 uppercase">
-                  STATUS: PREP
-                </div>
-              </div>
-            </div>
+             {upcoming ? (
+               upcoming.length > 0 ? (
+                 upcoming.map(app => (
+                   <div key={app.id} className="bg-surface-container-high flex items-center p-6 group cursor-pointer transition-all hover:bg-surface-bright animate-fade-in">
+                     <div className="w-20 font-label border-r border-surface-container-highest">
+                       <p className="text-xs text-on-surface-variant uppercase">Hora</p>
+                       <p className="text-lg font-bold text-white">{app.time}</p>
+                     </div>
+                     <div className="flex-1 px-8">
+                       <p className="font-label text-[10px] text-tertiary tracking-widest uppercase mb-1">{app.category} // {app.serviceName}</p>
+                       <h4 className="text-xl font-black tracking-tight text-white uppercase">{app.vehicleDesc}</h4>
+                     </div>
+                     <div className="text-right hidden sm:block">
+                       <select
+                         value={app.status || 'Agendado'}
+                         onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                         onClick={(e) => e.stopPropagation()}
+                         className={`appearance-none outline-none cursor-pointer px-4 py-2 text-[10px] font-label font-bold tracking-widest text-on-surface-variant uppercase border border-surface-container-highest ${
+                           app.status === 'Em Processamento' ? 'bg-white text-primary-container' :
+                           app.status === 'Finalizado' ? 'bg-surface-container-highest/80 text-white' :
+                           'bg-surface-container-lowest'
+                         }`}
+                       >
+                         <option value="Aguardando" className="text-black bg-white">AGUARDANDO</option>
+                         <option value="Agendado" className="text-black bg-white">AGENDADO</option>
+                         <option value="Em Processamento" className="text-black bg-white">EM PROCESSAMENTO</option>
+                         <option value="Finalizado" className="text-black bg-white">FINALIZADO</option>
+                       </select>
+                     </div>
+                   </div>
+                 ))
+               ) : (
+                 <div className="bg-surface-container-high p-8 text-center text-on-surface-variant font-label text-sm uppercase tracking-widest animate-fade-in">
+                   Nenhum serviço pendente no momento.
+                 </div>
+               )
+             ) : (
+               <>
+                 <SkeletonCard height="h-24" />
+                 <SkeletonCard height="h-24" />
+                 <SkeletonCard height="h-24" />
+               </>
+             )}
+          </div>
+
+          <div className="flex items-center justify-between mt-12 mb-6">
+            <h3 className="font-label text-sm font-bold tracking-[0.3em] text-white uppercase">Serviços_Finalizados</h3>
+          </div>
+          
+          <div className="space-y-4">
+             {finished ? (
+               finished.length > 0 ? (
+                 finished.map(app => (
+                   <div key={app.id} className="bg-surface-container-high flex items-center p-6 group cursor-pointer transition-all hover:bg-surface-bright animate-fade-in">
+                     <div className="w-20 font-label border-r border-surface-container-highest">
+                       <p className="text-xs text-on-surface-variant uppercase">Hora</p>
+                       <p className="text-lg font-bold text-white">{app.time}</p>
+                     </div>
+                     <div className="flex-1 px-8">
+                       <p className="font-label text-[10px] text-tertiary tracking-widest uppercase mb-1">{app.category} // {app.serviceName}</p>
+                       <h4 className="text-xl font-black tracking-tight text-white uppercase">{app.vehicleDesc}</h4>
+                     </div>
+                     <div className="text-right hidden sm:flex sm:items-center sm:gap-2">
+                       <select
+                         value={app.status || 'Agendado'}
+                         onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                         onClick={(e) => e.stopPropagation()}
+                         className={`appearance-none outline-none cursor-pointer px-4 py-2 text-[10px] font-label font-bold tracking-widest text-on-surface-variant uppercase border border-surface-container-highest ${
+                           app.status === 'Em Processamento' ? 'bg-white text-primary-container' :
+                           app.status === 'Finalizado' ? 'bg-surface-container-highest/80 text-white' :
+                           app.status === 'Pago' ? 'bg-[#1E5D3A] text-white' :
+                           'bg-surface-container-lowest'
+                         }`}
+                       >
+                         <option value="Aguardando" className="text-black bg-white">AGUARDANDO</option>
+                         <option value="Agendado" className="text-black bg-white">AGENDADO</option>
+                         <option value="Em Processamento" className="text-black bg-white">EM PROCESSAMENTO</option>
+                         <option value="Finalizado" className="text-black bg-white">FINALIZADO</option>
+                         <option value="Pago" className="text-black bg-white">PAGO</option>
+                       </select>
+                       
+                       {app.status === 'Finalizado' && (
+                         <button 
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             navigate('/caixa', { state: { appId: app.id } });
+                           }}
+                           className="bg-[#E31B23] text-white px-4 py-2 font-label text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all border border-[#E31B23]"
+                         >
+                           Ir para Caixa
+                         </button>
+                       )}
+                     </div>
+                   </div>
+                 ))
+               ) : (
+                 <div className="bg-surface-container-high p-8 text-center text-on-surface-variant font-label text-sm uppercase tracking-widest animate-fade-in">
+                   Nenhum serviço finalizado hoje.
+                 </div>
+               )
+             ) : (
+               <>
+                 <SkeletonCard height="h-24" />
+                 <SkeletonCard height="h-24" />
+               </>
+             )}
           </div>
         </div>
 
-        {/* Alerts */}
-        <div className="col-span-12 lg:col-span-4">
-          <div className="bg-surface-container-high p-8 h-full">
-            <div className="flex items-center mb-8">
-              <div className="w-2 h-2 bg-primary-container animate-pulse mr-3"></div>
-              <h3 className="font-label text-sm font-bold tracking-[0.3em] text-white uppercase">Notificações_Críticas</h3>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="flex space-x-4">
-                <div className="bg-error-container/20 p-2 h-fit">
-                  <span className="material-symbols-outlined text-primary-container">warning</span>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white mb-1">ALERTA_SUPRIMENTO</p>
-                  <p className="text-xs text-on-surface/50 font-label">Estoque abaixo de 15%.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   );

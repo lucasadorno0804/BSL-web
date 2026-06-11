@@ -1,6 +1,193 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import SignatureCanvas from 'react-signature-canvas';
+import { api } from '../services/api';
+
+const API_BASE_URL = 'http://localhost:3000/api';
+const SERVER_URL = API_BASE_URL.replace('/api', '');
 
 export default function Inspections() {
+  const location = useLocation();
+  const appointmentId = location.state?.appId || null; // Pode ser null se acessado diretamente
+
+  const [inspectionId, setInspectionId] = useState(null);
+  const [markers, setMarkers] = useState([]);
+  const [imagesUrls, setImagesUrls] = useState([]);
+  const [isLocked, setIsLocked] = useState(false);
+  const [diagramType, setDiagramType] = useState('Hatch');
+  const [activeMarkerType, setActiveMarkerType] = useState('ARRANHÃO');
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const sigCanvas = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Carregar ou criar Vistoria ao montar
+  useEffect(() => {
+    const loadOrCreateInspection = async () => {
+      try {
+        if (appointmentId) {
+          const existing = await api.get(`/inspections/${appointmentId}`).catch(() => null);
+          if (existing) {
+            setupInspectionState(existing);
+            return;
+          }
+        }
+
+        // Se não tem ou não encontrou, cria uma nova
+        const created = await api.post('/inspections', { appointmentId, type: 'Entrada' });
+        setupInspectionState(created);
+
+      } catch (err) {
+        console.error("Erro ao iniciar vistoria", err);
+      }
+    };
+    loadOrCreateInspection();
+  }, [appointmentId]);
+
+  const inferDiagramType = (modelString) => {
+    if (!modelString) return 'Hatch';
+    const lower = modelString.toLowerCase();
+    if (lower.includes('compass') || lower.includes('suv') || lower.includes('renegade') || lower.includes('tucson') || lower.includes('creta')) return 'Suv';
+    if (lower.includes('sedan') || lower.includes('320i') || lower.includes('corolla') || lower.includes('civic')) return 'Sedan';
+    if (lower.includes('sw') || lower.includes('perua') || lower.includes('avant') || lower.includes('touring') || lower.includes('variant')) return 'Sw';
+    return 'Hatch';
+  };
+
+  const setupInspectionState = (data) => {
+    setInspectionId(data.id);
+    setIsLocked(data.is_locked);
+
+    if (data.selected_diagram_type) {
+      setDiagramType(data.selected_diagram_type);
+    } else {
+      setDiagramType(inferDiagramType(data.vehicle_model));
+    }
+
+    if (data.checklist && typeof data.checklist === 'string') {
+      setMarkers(JSON.parse(data.checklist));
+    } else if (Array.isArray(data.checklist)) {
+      setMarkers(data.checklist);
+    }
+
+    if (data.images_urls && typeof data.images_urls === 'string') {
+      setImagesUrls(JSON.parse(data.images_urls));
+    } else if (Array.isArray(data.images_urls)) {
+      setImagesUrls(data.images_urls);
+    }
+  };
+
+  const handleDiagramClick = async (e) => {
+    if (isLocked || !inspectionId) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const newMarker = {
+      id: Date.now(),
+      x: xPercent,
+      y: yPercent,
+      type: activeMarkerType
+    };
+
+    const newMarkers = [...markers, newMarker];
+    setMarkers(newMarkers);
+
+    // Save to backend
+    try {
+      await api.put(`/inspections/${inspectionId}`, { checklist: newMarkers, diagramType });
+    } catch (error) {
+      console.error("Erro ao salvar marcador", error);
+    }
+  };
+
+  const handleClearMarkers = async (e) => {
+    e.stopPropagation();
+    if (isLocked || !inspectionId) return;
+
+    setMarkers([]);
+
+    try {
+      await api.put(`/inspections/${inspectionId}`, { checklist: [], diagramType });
+    } catch (error) {
+      console.error("Erro ao limpar marcadores", error);
+    }
+  };
+
+  const handleDiagramSwitch = async (type) => {
+    if (isLocked || diagramType === type || !inspectionId) return;
+    setDiagramType(type);
+    setMarkers([]); // Limpa as marcações do carro anterior
+    try {
+      await api.put(`/inspections/${inspectionId}`, { checklist: [], diagramType: type });
+    } catch (error) {
+      console.error("Erro ao alterar tipo do diagrama", error);
+    }
+  };
+
+  const handleDiagramMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+    setMousePos({ x: xPercent.toFixed(3), y: yPercent.toFixed(3) });
+  };
+
+  const handleFileUpload = async (e) => {
+    if (isLocked || !inspectionId || !e.target.files[0]) return;
+
+    const formData = new FormData();
+    formData.append('image', e.target.files[0]);
+
+    try {
+      // Use raw fetch for FormData because api.js forces JSON
+      const token = localStorage.getItem('@BSL:token');
+      const res = await fetch(`${API_BASE_URL}/inspections/${inspectionId}/upload`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: formData
+      });
+      const data = await res.json();
+
+      let newUrls = [];
+      if (typeof data.images_urls === 'string') {
+        newUrls = JSON.parse(data.images_urls);
+      } else {
+        newUrls = data.images_urls;
+      }
+      setImagesUrls(newUrls);
+    } catch (error) {
+      console.error("Erro ao enviar foto", error);
+    }
+  };
+
+  const handleLock = async () => {
+    if (isLocked || !inspectionId || !sigCanvas.current) return;
+
+    if (sigCanvas.current.isEmpty()) {
+      alert("Por favor, assine o documento antes de autorizar.");
+      return;
+    }
+
+    const signatureData = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+
+    try {
+      await api.post(`/inspections/${inspectionId}/lock`, { signature: signatureData });
+      setIsLocked(true);
+    } catch (error) {
+      console.error("Erro ao travar vistoria", error);
+      alert(error.message || "Erro ao bloquear");
+    }
+  };
+
+  const getMarkerColor = (type) => {
+    switch (type) {
+      case 'ARRANHÃO': return 'bg-[#E31B23] border-[#E31B23]';
+      case 'AMASSADO': return 'bg-tertiary-container border-tertiary-container';
+      case 'LASCADO': return 'bg-primary border-primary';
+      default: return 'bg-[#E31B23] border-[#E31B23]';
+    }
+  };
+
   return (
     <div className="pt-12 pb-12 px-12 min-h-screen bg-surface">
       {/* Inspection Header */}
@@ -13,8 +200,10 @@ export default function Inspections() {
         </div>
         <div className="text-right">
           <div className="bg-surface-container-high px-4 py-2 mb-2 inline-block">
-            <span className="font-label text-[10px] text-white/40 block">ID_CLIENTE</span>
-            <span className="font-label text-sm font-bold text-white tracking-widest">DR_6619_GT</span>
+            <span className="font-label text-[10px] text-white/40 block">VISTORIA ID</span>
+            <span className="font-label text-sm font-bold text-white tracking-widest uppercase">
+              {inspectionId ? inspectionId.split('-')[0] : 'CRIANDO...'}
+            </span>
           </div>
         </div>
       </div>
@@ -23,62 +212,104 @@ export default function Inspections() {
         {/* Left Column: Damage Mapping */}
         <div className="col-span-12 lg:col-span-8 space-y-8">
           {/* Vehicle Diagram Section */}
-          <section className="bg-surface-container-high p-10 relative overflow-hidden">
-            <div className="flex justify-between items-start mb-12">
+          <section className={`bg-surface-container-high p-10 relative overflow-hidden ${isLocked ? 'opacity-80 pointer-events-none' : ''}`}>
+            <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="font-label text-xs font-bold tracking-[0.2em] text-primary-container uppercase">01 // MAPEAMENTO DE SUPERFÍCIE</h3>
+                <h3 className="font-label text-xs font-bold tracking-[0.2em] text-primary-container uppercase">// MAPEAMENTO DE SUPERFÍCIE</h3>
                 <p className="text-[11px] font-body text-white/40 mt-1 uppercase tracking-wider">Marque zonas de impacto, marcas de turbilhonamento ou riscos profundos</p>
               </div>
-              <div className="flex gap-4">
-                <button className="bg-surface-bright px-3 py-1.5 font-label text-[10px] tracking-widest text-white border-l-2 border-primary-container">ARRANHÃO</button>
-                <button className="bg-surface-container-lowest px-3 py-1.5 font-label text-[10px] tracking-widest text-white/40 hover:bg-surface-bright transition-colors">AMASSADO</button>
-                <button className="bg-surface-container-lowest px-3 py-1.5 font-label text-[10px] tracking-widest text-white/40 hover:bg-surface-bright transition-colors">LASCADO</button>
+              <div className="flex gap-4 items-center">
+                {['ARRANHÃO', 'AMASSADO', 'LASCADO'].map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setActiveMarkerType(type)}
+                    className={`px-3 py-1.5 font-label text-[10px] tracking-widest transition-colors flex items-center gap-2 ${activeMarkerType === type ? 'bg-surface-bright text-white border-l-2 border-primary-container' : 'bg-surface-container-lowest text-white/40 hover:bg-surface-bright'}`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${getMarkerColor(type)} inline-block`}></span>
+                    {type}
+                  </button>
+                ))}
+                {!isLocked && markers.length > 0 && (
+                  <button
+                    onClick={handleClearMarkers}
+                    className="ml-2 px-3 py-1.5 font-label text-[10px] tracking-widest text-[#E31B23] hover:bg-[#E31B23]/10 transition-colors uppercase flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">delete</span>
+                    Limpar
+                  </button>
+                )}
               </div>
             </div>
-            
+
+            {/* Diagram Switcher */}
+            <div className="flex gap-2 mb-8">
+              {['Hatch', 'Sedan', 'Suv', 'Sw'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => handleDiagramSwitch(type)}
+                  disabled={isLocked}
+                  className={`px-4 py-2 font-label text-[10px] tracking-widest transition-colors uppercase ${diagramType === type ? 'bg-primary-container text-surface-container-lowest' : 'bg-surface-container-lowest text-white/40 hover:bg-surface-bright disabled:opacity-50 disabled:cursor-not-allowed'}`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+
             {/* Diagram Container */}
-            <div className="relative w-full aspect-[21/9] bg-surface-container-lowest flex items-center justify-center p-12">
-              <img alt="Contorno do Veículo" className="w-full h-full object-contain opacity-20 grayscale brightness-150 mix-blend-screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSPDaKc_y2q0HmqDbezCLbHik4G5JJakSrpcKqi0QzPt-ezUlG0ckd_xtwfFXAD1_TncUjtJ6A8sGCtOQeNnEG07WDHnxo_LAy7nncB2rgEn0ApE2QVYOe1M_oq7s8RFFjVIEGwkq3R-p61GiDsrbSlntpeSzOS-SYgbsQgnX1z9NjDkQi-cjl2v2l6sLoaVEUStsOaE9C5glFqJDBqsf_YNbwgq1Tzqp4x5lUkoBVTjuidUwnAdHqga-YlrqDP0QJxnEl4XcWADJc"/>
-              
+            <div
+              className="relative w-full aspect-video bg-surface-container-lowest flex items-center justify-center p-4 cursor-crosshair overflow-hidden"
+              onClick={handleDiagramClick}
+              onMouseMove={handleDiagramMouseMove}
+            >
+              <img alt={`Contorno do Veículo ${diagramType}`} className="w-full h-full object-contain invert opacity-40 pointer-events-none select-none drop-shadow-md" src={`/${diagramType}.svg`} />
+
               {/* Damage Markers */}
-              <div className="absolute top-1/2 left-1/3 w-6 h-6 border border-primary-container flex items-center justify-center animate-pulse">
-                <span className="w-1 h-1 bg-primary-container"></span>
-              </div>
-              <div className="absolute top-[40%] right-1/4 w-6 h-6 border border-primary-container flex items-center justify-center">
-                <span className="w-1 h-1 bg-primary-container"></span>
-              </div>
-              <div className="absolute bottom-1/3 left-1/2 w-4 h-4 border border-tertiary-container flex items-center justify-center">
-                <span className="w-1 h-1 bg-tertiary-container"></span>
-              </div>
-              
+              {markers.map(marker => (
+                <div
+                  key={marker.id}
+                  className={`absolute w-3 h-3 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)] border-2 pointer-events-none transform -translate-x-1/2 -translate-y-1/2 animate-fade-in ${getMarkerColor(marker.type)}`}
+                  style={{ top: `${marker.y}%`, left: `${marker.x}%` }}
+                  title={marker.type}
+                />
+              ))}
+
               {/* Technical Overlays */}
-              <div className="absolute top-4 left-4 font-label text-[9px] text-primary-container tracking-widest leading-tight">
-                MODO_SCAN: ATIVO<br/>SENSIBILIDADE: ALTA
+              <div className="absolute top-4 left-4 font-label text-[9px] text-primary-container tracking-widest leading-tight pointer-events-none">
+                MODO_SCAN: {isLocked ? 'BLOQUEADO' : 'ATIVO'}<br />MARCADORES: {markers.length}
               </div>
-              <div className="absolute bottom-4 right-4 font-label text-[9px] text-white/20 tracking-widest text-right leading-tight">
-                REF_X: 22.049<br/>REF_Y: 11.884
+              <div className="absolute bottom-4 right-4 font-label text-[9px] text-white/20 tracking-widest text-right leading-tight pointer-events-none">
+                REF_X: {mousePos.x}<br />REF_Y: {mousePos.y}
               </div>
             </div>
           </section>
 
           {/* Photo Evidence Bento Grid */}
           <section className="grid grid-cols-3 gap-4">
-            <div className="col-span-1 bg-surface-container-high aspect-square group relative cursor-pointer overflow-hidden">
-              <img alt="Defeito de Pintura" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0aZpUBSv1rlbZOdfAONAdh7qChqGbZQjvnYxmJ6d2MEhryS6M9SmCq4S2loujX4JVWegHVmBbjLTBRPj-i0yZSYTd-7H9aYlQ-cV9qPPE7UtXXg5dwvf5Vy6g6X_7jASicgyNUimOUkm27FQr-GnZPv9ec-0Mx9XWfj3M35zHvssSrRPoj7l42HnKMLAzCpaLDcyCznKFSlLdl3UUKPanv_MBqdejsqIFFRK3IxfmKGN204E28-bJ4u_X258mAjOJCs0a0R_lcVjm"/>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-surface-container-lowest/80 backdrop-blur-sm">
-                <p className="font-label text-[9px] tracking-widest text-white">MACRO_QUINA_TRASEIRA</p>
+            {imagesUrls.map((url, idx) => (
+              <div key={idx} className="col-span-1 bg-surface-container-high aspect-square group relative cursor-pointer overflow-hidden">
+                <img alt={`Evidência ${idx}`} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" src={`${SERVER_URL}${url}`} />
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-surface-container-lowest/80 backdrop-blur-sm">
+                  <p className="font-label text-[9px] tracking-widest text-white">EVIDÊNCIA_{String(idx + 1).padStart(2, '0')}</p>
+                </div>
               </div>
-            </div>
-            <div className="col-span-1 bg-surface-container-high aspect-square group relative cursor-pointer overflow-hidden">
-              <img alt="Detalhe da Roda" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQOfdxP4-MtvN2QUxUe6bi3rSn4BqSlK_fbX7EhEMvK1tbEwAuEtq9DIEqxK9C45i62Frf_QkUyOar0U3VC1VNj6nGbl_M4xkK-0crZNcwtXY9O7Q0GH8Zb8rGbd0olLrNjOkK_w8IT4AqMpAQ2InCIjqWgmcl5E1OIhpfcjCxRnY1l8CWhPAprnZmdzFSe3jyy-TvZPeVLBOqdIkFJ5Z3psS5h2stKs-ucuW8ezWTB_gHy5CA0hW8bAX6uhupIuWSQagdC0ZigMFY"/>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-surface-container-lowest/80 backdrop-blur-sm">
-                <p className="font-label text-[9px] tracking-widest text-white">ZONA_RODA_02</p>
+            ))}
+
+            {!isLocked && (
+              <div
+                className="col-span-1 bg-surface-container-lowest flex flex-col items-center justify-center border-2 border-dashed border-white/5 hover:border-primary-container transition-colors group cursor-pointer aspect-square"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <span className="material-symbols-outlined text-white/20 group-hover:text-primary-container mb-2 transition-colors">add_a_photo</span>
+                <p className="font-label text-[10px] tracking-widest text-white/40 group-hover:text-white uppercase transition-colors">Enviar Foto</p>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept="image/*"
+                />
               </div>
-            </div>
-            <div className="col-span-1 bg-surface-container-lowest flex flex-col items-center justify-center border-2 border-dashed border-white/5 hover:border-primary-container transition-colors group cursor-pointer">
-              <span className="material-symbols-outlined text-white/20 group-hover:text-primary-container mb-2">add_a_photo</span>
-              <p className="font-label text-[10px] tracking-widest text-white/40 group-hover:text-white uppercase">Enviar Foto</p>
-            </div>
+            )}
           </section>
         </div>
 
@@ -86,12 +317,11 @@ export default function Inspections() {
         <div className="col-span-12 lg:col-span-4 space-y-8">
           {/* Status & Technical Checklist */}
           <section className="bg-surface-container-high p-8">
-            <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-8">02 // ANÁLISE TÉCNICA</h3>
+            <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-8">// ANÁLISE TÉCNICA</h3>
             <div className="space-y-6">
-              {/* Checklist Item */}
               <div className="flex items-center justify-between p-4 bg-surface-container-low group cursor-pointer">
                 <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-primary-container text-lg" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                  <span className="material-symbols-outlined text-primary-container text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                   <span className="font-label text-xs tracking-widest text-white/80 uppercase">Teste de Micragem</span>
                 </div>
                 <span className="font-label text-[10px] text-primary-container font-bold">120μm</span>
@@ -103,52 +333,65 @@ export default function Inspections() {
                 </div>
                 <span className="font-label text-[10px] text-tertiary-container font-bold">ESCANER</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-surface-container-low group cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-white/20 text-lg">radio_button_unchecked</span>
-                  <span className="font-label text-xs tracking-widest text-white/40 uppercase">Análise de Odor Interno</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-4 bg-surface-container-low group cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-white/20 text-lg">radio_button_unchecked</span>
-                  <span className="font-label text-xs tracking-widest text-white/40 uppercase">Nível de Fluidos do Motor</span>
-                </div>
-              </div>
             </div>
           </section>
 
           {/* Legal Security Section */}
           <section className="bg-surface-container-high p-8 border-l-4 border-primary-container">
-            <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-4">03 // SEGURANÇA JURÍDICA</h3>
+            <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-4">// SEGURANÇA JURÍDICA</h3>
             <p className="font-body text-[10px] text-white/40 leading-relaxed uppercase tracking-widest mb-6">
-                Ao finalizar este check-in, o técnico confirma que todas as condições pré-existentes foram documentadas. A assinatura do cliente reconhece o estado atual do veículo antes dos procedimentos de detalhamento.
+              Ao finalizar este check-in, o técnico confirma que todas as condições pré-existentes foram documentadas. A assinatura do cliente reconhece o estado atual do veículo antes dos procedimentos.
             </p>
+
             {/* Signature Field */}
-            <div className="bg-surface-container-lowest h-32 w-full mb-6 relative flex items-center justify-center overflow-hidden">
-               {/* Note: omitted the 100kb background texture to save bandwidth on rendering and keep aesthetic clean */}
-              <span className="font-label text-[9px] text-white/10 uppercase tracking-[0.5em] absolute top-2 left-2 italic">BLOQUEIO_ID_DIGITAL</span>
-              <div className="w-4/5 h-[1px] bg-white/20 relative">
+            <div className="bg-surface-container-lowest h-32 w-full mb-2 relative flex flex-col justify-center overflow-hidden border border-surface-container-highest">
+              {isLocked ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-surface-container-lowest z-20">
+                  <span className="font-label text-[14px] text-primary-container font-bold tracking-[0.3em] uppercase opacity-70 rotate-[-10deg] border-2 border-primary-container px-4 py-2">
+                    VISTORIA TRAVADA
+                  </span>
+                </div>
+              ) : (
+                <SignatureCanvas
+                  ref={sigCanvas}
+                  penColor="#fff"
+                  canvasProps={{ className: 'w-full h-full absolute inset-0 z-10 cursor-crosshair' }}
+                />
+              )}
+
+              <span className="font-label text-[9px] text-white/10 uppercase tracking-[0.5em] absolute top-2 left-2 italic pointer-events-none">BLOQUEIO_ID_DIGITAL</span>
+              <div className="w-4/5 h-[1px] bg-white/20 relative mx-auto pointer-events-none mt-auto mb-4">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 font-label text-[8px] text-white/20">COLOQUE A ASSINATURA AQUI</div>
               </div>
             </div>
-            
-            <div className="flex flex-col gap-2">
-              <button className="w-full bg-primary-container text-white py-4 font-label font-black text-xs tracking-[0.3em] uppercase transition-all duration-150 active:scale-95 shadow-[0_0_20px_rgba(227,27,35,0.2)]">
-                  AUTORIZAR E BLOQUEAR SCAN
+
+            {!isLocked && (
+              <button onClick={() => sigCanvas.current?.clear()} className="font-label text-[9px] text-white/40 hover:text-white uppercase tracking-widest mb-6 transition-colors w-full text-right">
+                Limpar Assinatura
               </button>
-              <button className="w-full bg-surface-bright text-white/60 py-3 font-label font-bold text-[10px] tracking-widest uppercase hover:text-white transition-colors">
-                  IMPRIMIR CÓPIA FÍSICA
+            )}
+
+            <div className="flex flex-col gap-2 mt-4">
+              <button
+                onClick={handleLock}
+                disabled={isLocked}
+                className="w-full bg-primary-container text-white py-4 font-label font-black text-xs tracking-[0.3em] uppercase transition-all duration-150 active:scale-95 shadow-[0_0_20px_rgba(227,27,35,0.2)] disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none"
+              >
+                {isLocked ? 'VISTORIA AUTORIZADA' : 'AUTORIZAR E BLOQUEAR SCAN'}
               </button>
             </div>
           </section>
 
           {/* Telemetry Chip */}
           <div className="bg-tertiary-container/10 p-4 flex items-center gap-4">
-            <div className="w-2 h-2 bg-tertiary-container animate-pulse"></div>
+            <div className={`w-2 h-2 ${isLocked ? 'bg-[#E31B23]' : 'bg-tertiary-container animate-pulse'}`}></div>
             <div>
-              <p className="font-label text-[9px] font-bold text-tertiary-container tracking-widest">STATUS DO SISTEMA: OTIMIZADO</p>
-              <p className="font-label text-[8px] text-tertiary-container/60 uppercase">Sincronizando dados com a nuvem de precisão...</p>
+              <p className={`font-label text-[9px] font-bold tracking-widest ${isLocked ? 'text-[#E31B23]' : 'text-tertiary-container'}`}>
+                STATUS DO SISTEMA: {isLocked ? 'BLOQUEADO/SEGURO' : 'OTIMIZADO'}
+              </p>
+              <p className={`font-label text-[8px] uppercase ${isLocked ? 'text-[#E31B23]/60' : 'text-tertiary-container/60'}`}>
+                {isLocked ? 'Registro imutável salvo no servidor.' : 'Sincronizando dados com a nuvem de precisão...'}
+              </p>
             </div>
           </div>
         </div>

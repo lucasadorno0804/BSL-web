@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 
 export default function Checkout() {
+  const location = useLocation();
+  const preSelectedAppId = location.state?.appId;
   const [appointments, setAppointments] = useState([]);
   const [catalog, setCatalog] = useState([]);
   const [selectedAppId, setSelectedAppId] = useState('');
@@ -25,8 +28,13 @@ export default function Checkout() {
       
       const apps = Array.isArray(resApps) ? resApps : [];
       setAppointments(apps);
+      
       if (apps.length > 0) {
-        setSelectedAppId(apps[0].id);
+        if (preSelectedAppId && apps.some(a => a.id === preSelectedAppId)) {
+          setSelectedAppId(preSelectedAppId);
+        } else {
+          setSelectedAppId(apps[0].id);
+        }
       }
       setCatalog(resSchedule.services || []);
     } catch (err) {

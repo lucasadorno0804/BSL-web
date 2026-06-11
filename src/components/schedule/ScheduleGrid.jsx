@@ -62,6 +62,15 @@ export default function ScheduleGrid({ appointments = [], boxes = [], viewDate =
     }
   };
 
+  const handleStatusChange = async (appId, newStatus) => {
+    try {
+      await api.patch(`/schedule/appointments/${appId}`, { status: newStatus });
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      setErrorMessage(err.message || 'Erro ao alterar status');
+    }
+  };
+
   // --- CÁLCULO DE POSICIONAMENTO PARA LARGURAS EXATAS ---
   const calculatePosition = (startISO, endISO) => {
     const start = new Date(startISO);
@@ -81,21 +90,29 @@ export default function ScheduleGrid({ appointments = [], boxes = [], viewDate =
     };
   };
 
-  const getDynamicStatusAndProgress = (startISO, endISO) => {
+  const getDynamicStatusAndProgress = (app) => {
+    const start = new Date(app.start_time);
+    const end = new Date(app.end_time);
     const now = new Date();
-    const start = new Date(startISO);
-    const end = new Date(endISO);
 
-    if (now < start) {
-      return { statusLabel: 'FILA', statusKey: 'waiting', progress: 0 };
-    } else if (now >= start && now <= end) {
+    let statusKey = 'waiting';
+    let statusLabel = app.status ? app.status.toUpperCase() : 'AGENDADO';
+    let progress = 0;
+
+    if (app.status === 'Finalizado') {
+      statusKey = 'finished';
+      progress = 100;
+    } else if (app.status === 'Em Processamento') {
+      statusKey = 'active';
       const totalDuration = end.getTime() - start.getTime();
       const elapsed = now.getTime() - start.getTime();
-      const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-      return { statusLabel: 'ATIVO', statusKey: 'active', progress };
+      progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
     } else {
-      return { statusLabel: 'FINALIZADO', statusKey: 'finished', progress: 100 };
+      statusKey = 'waiting';
+      progress = 0;
     }
+
+    return { statusLabel, statusKey, progress };
   };
 
   return (
@@ -170,7 +187,7 @@ export default function ScheduleGrid({ appointments = [], boxes = [], viewDate =
                 .filter(a => a.box_number === box.number)
                 .map((app) => {
                   const { left, width } = calculatePosition(app.start_time, app.end_time);
-                  const { statusLabel, statusKey, progress } = getDynamicStatusAndProgress(app.start_time, app.end_time);
+                  const { statusLabel, statusKey, progress } = getDynamicStatusAndProgress(app);
                   
                   const isFinished = statusKey === 'finished';
                   const mainColor = isFinished ? 'bg-surface-container-highest/80' : 
@@ -206,9 +223,17 @@ export default function ScheduleGrid({ appointments = [], boxes = [], viewDate =
                         <div className="flex flex-col gap-1 w-full">
                            <div className="flex justify-between items-center w-full">
                              <span className={`font-label text-[8px] tracking-widest ${subtextColor}`}>CHASSI: {app.plate}</span>
-                             <span className={`px-2 py-0.5 font-label text-[7px] font-black uppercase tracking-widest ${badgeClasses}`}>
-                               {statusLabel}
-                             </span>
+                             <select
+                               value={app.status || 'Agendado'}
+                               onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                               onClick={(e) => e.stopPropagation()}
+                               className={`appearance-none outline-none cursor-pointer px-2 py-0.5 font-label text-[7px] font-black uppercase tracking-widest ${badgeClasses}`}
+                             >
+                               <option value="Aguardando" className="text-black bg-white">AGUARDANDO</option>
+                               <option value="Agendado" className="text-black bg-white">AGENDADO</option>
+                               <option value="Em Processamento" className="text-black bg-white">EM PROCESSAMENTO</option>
+                               <option value="Finalizado" className="text-black bg-white">FINALIZADO</option>
+                             </select>
                            </div>
                            
                            {/* Barra de Progresso caso ativo */}
