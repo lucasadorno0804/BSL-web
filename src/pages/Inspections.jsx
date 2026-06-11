@@ -18,6 +18,10 @@ export default function Inspections() {
   const [activeMarkerType, setActiveMarkerType] = useState('ARRANHÃO');
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
+  const [clients, setClients] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+
   const sigCanvas = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -43,6 +47,18 @@ export default function Inspections() {
     };
     loadOrCreateInspection();
   }, [appointmentId]);
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const res = await api.get('/schedule/resources');
+        setClients(res.clients || []);
+      } catch (err) {
+        console.error("Erro ao buscar clientes", err);
+      }
+    };
+    fetchResources();
+  }, []);
 
   const inferDiagramType = (modelString) => {
     if (!modelString) return 'Hatch';
@@ -74,6 +90,9 @@ export default function Inspections() {
     } else if (Array.isArray(data.images_urls)) {
       setImagesUrls(data.images_urls);
     }
+
+    if (data.client_id) setSelectedClientId(data.client_id);
+    if (data.vehicle_id) setSelectedVehicleId(data.vehicle_id);
   };
 
   const handleDiagramClick = async (e) => {
@@ -130,6 +149,25 @@ export default function Inspections() {
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
     setMousePos({ x: xPercent.toFixed(3), y: yPercent.toFixed(3) });
+  };
+
+  const handleVehicleSelect = async (vehicleId) => {
+    if (isLocked || !inspectionId) return;
+    setSelectedVehicleId(vehicleId);
+    try {
+      await api.put(`/inspections/${inspectionId}/vehicle`, { vehicleId });
+      
+      const client = clients.find(c => c.id === selectedClientId);
+      const vehicle = client?.vehicles.find(v => v.id === vehicleId);
+      if (vehicle) {
+        const inferred = inferDiagramType(vehicle.model);
+        if (diagramType !== inferred) {
+           handleDiagramSwitch(inferred);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar veículo", error);
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -315,23 +353,41 @@ export default function Inspections() {
 
         {/* Right Column: Checklists & Legal */}
         <div className="col-span-12 lg:col-span-4 space-y-8">
-          {/* Status & Technical Checklist */}
+          {/* Identification Section */}
           <section className="bg-surface-container-high p-8">
-            <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-8">// ANÁLISE TÉCNICA</h3>
+            <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-8">// IDENTIFICAÇÃO</h3>
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-surface-container-low group cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-primary-container text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                  <span className="font-label text-xs tracking-widest text-white/80 uppercase">Teste de Micragem</span>
-                </div>
-                <span className="font-label text-[10px] text-primary-container font-bold">120μm</span>
+              <div className="flex flex-col gap-2">
+                <label className="font-label text-[10px] text-white/40 uppercase tracking-widest">Cliente</label>
+                <select 
+                  className="bg-surface-container-low border border-surface-container-highest text-white p-3 font-body text-sm outline-none focus:border-primary-container disabled:opacity-50"
+                  value={selectedClientId || ''}
+                  onChange={(e) => {
+                    setSelectedClientId(e.target.value);
+                    setSelectedVehicleId('');
+                  }}
+                  disabled={isLocked || !!appointmentId}
+                >
+                  <option value="">Selecione o Cliente</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="flex items-center justify-between p-4 bg-surface-container-low group cursor-pointer border-l-2 border-tertiary-container">
-                <div className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary-container text-lg">pending</span>
-                  <span className="font-label text-xs tracking-widest text-white/80 uppercase">Integridade dos Vidros</span>
-                </div>
-                <span className="font-label text-[10px] text-tertiary-container font-bold">ESCANER</span>
+
+              <div className="flex flex-col gap-2">
+                <label className="font-label text-[10px] text-white/40 uppercase tracking-widest">Veículo</label>
+                <select 
+                  className="bg-surface-container-low border border-surface-container-highest text-white p-3 font-body text-sm outline-none focus:border-primary-container disabled:opacity-50"
+                  value={selectedVehicleId || ''}
+                  onChange={(e) => handleVehicleSelect(e.target.value)}
+                  disabled={isLocked || !selectedClientId || !!appointmentId}
+                >
+                  <option value="">Selecione o Veículo</option>
+                  {clients.find(c => c.id === selectedClientId)?.vehicles.map(v => (
+                    <option key={v.id} value={v.id}>{v.brand} {v.model} - {v.plate}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </section>

@@ -1,4 +1,6 @@
-const BASE_URL = 'http://localhost:3000/api';
+const apiUrl = import.meta.env.VITE_API_URL;
+
+console.log("apiUrl", apiUrl);
 
 export const api = {
   async get(endpoint) {
@@ -34,7 +36,7 @@ export const api = {
 
   async request(endpoint, options) {
     const token = localStorage.getItem('@BSL:token');
-    
+
     const headers = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -44,7 +46,7 @@ export const api = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const response = await fetch(`${apiUrl}${endpoint}`, {
       ...options,
       headers,
     });
@@ -62,7 +64,7 @@ export const api = {
   },
 
   createService: async (serviceData) => {
-    const response = await fetch(`${BASE_URL}/schedule/services`, {
+    const response = await fetch(`${apiUrl}/schedule/services`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(serviceData)
@@ -75,7 +77,7 @@ export const api = {
   },
 
   createProfessional: async (professionalData) => {
-    const response = await fetch(`${BASE_URL}/schedule/professionals`, {
+    const response = await fetch(`${apiUrl}/schedule/professionals`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(professionalData)
@@ -88,7 +90,7 @@ export const api = {
   },
 
   deleteProfessional: async (id) => {
-    const response = await fetch(`${BASE_URL}/schedule/professionals/${id}`, {
+    const response = await fetch(`${apiUrl}/schedule/professionals/${id}`, {
       method: 'DELETE'
     });
     if (!response.ok) {
