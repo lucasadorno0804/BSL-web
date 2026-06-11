@@ -1,4 +1,4 @@
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL || 'https://api-rsbf.onrender.com/api';
 
 console.log("apiUrl", apiUrl);
 
