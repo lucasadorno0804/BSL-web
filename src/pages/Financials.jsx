@@ -228,7 +228,7 @@ export default function Financials() {
                 <span className="font-label text-[10px] text-on-surface-variant uppercase">Saída</span>
               </div>
             </div>
-            <div className="h-72 bg-surface-container-lowest p-8">
+            <div className="h-80 w-full min-w-0 bg-surface-container-lowest p-8">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.flowData} barGap={4} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#8E918F', fontSize: 10, fontFamily: 'monospace' }} />

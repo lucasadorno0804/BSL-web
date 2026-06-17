@@ -96,7 +96,7 @@ export default function Dashboard() {
                   {revenue.variation > 0 ? '+' : ''}{revenue.variation}%
                 </p>
               </div>
-              <div className="flex-1 w-full h-16 mt-auto">
+              <div className="flex-1 w-full min-h-[150px] min-w-0 mt-auto">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenue.chartData}>
                     <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={{ backgroundColor: '#1E1E1E', border: 'none', color: '#FFF' }} />
