@@ -13,7 +13,7 @@ export default function Financials() {
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/financial/dashboard');
+      const res = await fetch('https://api-rsbf.onrender.com/api/financial/dashboard');
       if (res.ok) {
         const json = await res.json();
         setData(json);
@@ -35,7 +35,7 @@ export default function Financials() {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/api/financial/expense', {
+      const res = await fetch('https://api-rsbf.onrender.com/api/financial/expense', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category: expenseCategory, amount: amountNum })
