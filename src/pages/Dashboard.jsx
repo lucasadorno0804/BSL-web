@@ -41,12 +41,12 @@ export default function Dashboard() {
 
 
   return (
-    <div className="px-12 py-8 h-screen overflow-y-auto bg-surface relative z-10">
+    <div className="px-4 md:px-12 py-6 md:py-8 h-screen overflow-y-auto bg-surface relative z-10">
       {/* Dashboard Header */}
-      <div className="flex justify-between items-end mb-12">
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-end gap-4 mb-8 md:mb-12">
         <div>
           <p className="font-label text-primary-container text-xs tracking-[0.2em] font-bold mb-2">STATUS_DO_SISTEMA: OTIMIZADO</p>
-          <h2 className="text-5xl font-black tracking-tight text-white uppercase">Batimento <span className="text-primary-container">Operacional</span></h2>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white uppercase">Batimento <span className="text-primary-container">Operacional</span></h2>
         </div>
         <div className="text-right hidden md:block">
           <p className="font-label text-on-surface-variant text-xs tracking-widest">TIMESTAMP_SESSAO</p>
@@ -65,7 +65,7 @@ export default function Dashboard() {
           </div>
           {occupancy ? (
             <div className="mt-8 animate-fade-in">
-              <p className="text-7xl font-black text-white tracking-tighter">
+              <p className="text-5xl md:text-7xl font-black text-white tracking-tighter">
                 {occupancy.current}
                 <span className="text-2xl text-on-surface-variant font-light tracking-normal ml-2">/ {occupancy.capacity}</span>
               </p>
@@ -91,7 +91,7 @@ export default function Dashboard() {
           {revenue ? (
             <div className="flex-1 flex flex-col animate-fade-in">
               <div className="flex items-baseline space-x-4 mb-4">
-                <p className="text-6xl font-black text-white tracking-tighter">{formatCurrency(revenue.today)}</p>
+                <p className="text-4xl md:text-6xl font-black text-white tracking-tighter">{formatCurrency(revenue.today)}</p>
                 <p className={`font-label text-sm font-bold ${revenue.variation >= 0 ? 'text-tertiary' : 'text-[#E31B23]'}`}>
                   {revenue.variation > 0 ? '+' : ''}{revenue.variation}%
                 </p>
@@ -127,16 +127,16 @@ export default function Dashboard() {
              {upcoming ? (
                upcoming.length > 0 ? (
                  upcoming.map(app => (
-                   <div key={app.id} className="bg-surface-container-high flex items-center p-6 group cursor-pointer transition-all hover:bg-surface-bright animate-fade-in">
-                     <div className="w-20 font-label border-r border-surface-container-highest">
+                   <div key={app.id} className="bg-surface-container-high flex flex-col sm:flex-row items-start sm:items-center p-4 sm:p-6 group cursor-pointer transition-all hover:bg-surface-bright animate-fade-in gap-4 sm:gap-0">
+                     <div className="w-full sm:w-20 font-label border-b sm:border-b-0 sm:border-r border-surface-container-highest pb-2 sm:pb-0 flex sm:block justify-between items-center">
                        <p className="text-xs text-on-surface-variant uppercase">Hora</p>
                        <p className="text-lg font-bold text-white">{app.time}</p>
                      </div>
-                     <div className="flex-1 px-8">
+                     <div className="flex-1 px-0 sm:px-8 w-full">
                        <p className="font-label text-[10px] text-tertiary tracking-widest uppercase mb-1">{app.category} // {app.serviceName}</p>
                        <h4 className="text-xl font-black tracking-tight text-white uppercase">{app.vehicleDesc}</h4>
                      </div>
-                     <div className="text-right hidden sm:block">
+                     <div className="w-full sm:w-auto mt-2 sm:mt-0 text-right">
                        <select
                          value={app.status || 'Agendado'}
                          onChange={(e) => handleStatusChange(app.id, e.target.value)}
@@ -177,16 +177,16 @@ export default function Dashboard() {
              {finished ? (
                finished.length > 0 ? (
                  finished.map(app => (
-                   <div key={app.id} className="bg-surface-container-high flex items-center p-6 group cursor-pointer transition-all hover:bg-surface-bright animate-fade-in">
-                     <div className="w-20 font-label border-r border-surface-container-highest">
+                   <div key={app.id} className="bg-surface-container-high flex flex-col sm:flex-row items-start sm:items-center p-4 sm:p-6 group cursor-pointer transition-all hover:bg-surface-bright animate-fade-in gap-4 sm:gap-0">
+                     <div className="w-full sm:w-20 font-label border-b sm:border-b-0 sm:border-r border-surface-container-highest pb-2 sm:pb-0 flex sm:block justify-between items-center">
                        <p className="text-xs text-on-surface-variant uppercase">Hora</p>
                        <p className="text-lg font-bold text-white">{app.time}</p>
                      </div>
-                     <div className="flex-1 px-8">
+                     <div className="flex-1 px-0 sm:px-8 w-full">
                        <p className="font-label text-[10px] text-tertiary tracking-widest uppercase mb-1">{app.category} // {app.serviceName}</p>
                        <h4 className="text-xl font-black tracking-tight text-white uppercase">{app.vehicleDesc}</h4>
                      </div>
-                     <div className="text-right hidden sm:flex sm:items-center sm:gap-2">
+                     <div className="w-full sm:w-auto mt-2 sm:mt-0 flex flex-wrap sm:items-center gap-2">
                        <select
                          value={app.status || 'Agendado'}
                          onChange={(e) => handleStatusChange(app.id, e.target.value)}

@@ -70,10 +70,10 @@ export default function Financials() {
   };
 
   return (
-    <div className="p-12 min-h-screen bg-surface">
+    <div className="p-4 md:p-12 min-h-screen bg-surface">
       {/* Hero Financial Stats */}
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-0 mb-12 border-l border-outline-variant/10">
-        <div className="p-8 bg-surface-container-low">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 mb-8 md:mb-12 border-l border-outline-variant/10">
+        <div className="p-6 md:p-8 bg-surface-container-low border-b sm:border-b-0 sm:border-r border-outline-variant/10">
           <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Receita Total (MTD)</p>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-black tracking-tight text-white">{formatCurrency(data.kpis.receitaTotal)}</h2>
@@ -82,21 +82,21 @@ export default function Financials() {
             </span>
           </div>
         </div>
-        <div className="p-8 bg-surface-container-high">
+        <div className="p-6 md:p-8 bg-surface-container-high border-b lg:border-b-0 lg:border-r border-outline-variant/10">
           <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Comissões Pendentes</p>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-black tracking-tight text-[#E31B23]">{formatCurrency(data.kpis.comissoesPendentes)}</h2>
             <span className="material-symbols-outlined text-[#E31B23]">hourglass_empty</span>
           </div>
         </div>
-        <div className="p-8 bg-surface-container-low">
+        <div className="p-6 md:p-8 bg-surface-container-low border-b sm:border-b-0 sm:border-r border-outline-variant/10">
           <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Despesas Operacionais</p>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-black tracking-tight text-white">{formatCurrency(data.kpis.despesas)}</h2>
             <span className="text-[10px] font-label text-[#E31B23] bg-[#E31B23]/10 px-2 py-1">MTD</span>
           </div>
         </div>
-        <div className="p-8 bg-surface-container-high">
+        <div className="p-6 md:p-8 bg-surface-container-high">
           <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Fluxo de Caixa Líquido</p>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-black tracking-tight text-white">{formatCurrency(data.kpis.fluxoLiquido)}</h2>
@@ -150,76 +150,14 @@ export default function Financials() {
             </div>
           </section>
 
-          <section>
-            <h3 className="font-headline font-bold text-lg tracking-[0.02em] mb-8 border-l-4 border-tertiary pl-4">ENTRADA_DE_CAIXA</h3>
-            <div className="bg-surface-container-high p-8">
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <button className="bg-surface-container-lowest py-6 flex flex-col items-center justify-center border-l border-tertiary hover:bg-surface-bright transition-all">
-                  <span className="material-symbols-outlined text-tertiary mb-2">qr_code_2</span>
-                  <span className="font-label text-[10px] tracking-widest">PIX</span>
-                </button>
-                <button className="bg-surface-container-lowest py-6 flex flex-col items-center justify-center opacity-50 hover:opacity-100 transition-all">
-                  <span className="material-symbols-outlined text-white mb-2">credit_card</span>
-                  <span className="font-label text-[10px] tracking-widest">CARTÃO</span>
-                </button>
-                <button className="bg-surface-container-lowest py-6 flex flex-col items-center justify-center opacity-50 hover:opacity-100 transition-all">
-                  <span className="material-symbols-outlined text-white mb-2">payments</span>
-                  <span className="font-label text-[10px] tracking-widest">DINHEIRO</span>
-                </button>
-              </div>
-              <div className="bg-surface-container-lowest p-6 flex items-center justify-between">
-                <span className="font-label text-[10px] text-on-surface-variant uppercase">Volume Diário Pix</span>
-                <span className="font-label text-sm text-tertiary font-bold">{formatCurrency(data.kpis.receitaTotal * 0.4)}</span> {/* Placeholder para layout */}
-              </div>
-            </div>
-          </section>
+
         </div>
 
-        {/* Right Column: Matriz de comissões */}
+        {/* Right Column: Análise de Fluxo */}
         <div className="lg:col-span-8">
-          <section className="mb-12">
-            <div className="flex justify-between items-end mb-8">
-              <h3 className="font-headline font-bold text-lg tracking-[0.02em] border-l-4 border-on-tertiary-fixed-variant pl-4">MATRIZ_DE_COMISSÕES</h3>
-              <p className="font-label text-[10px] text-on-surface-variant uppercase tracking-[0.05em]">Período: Mês Atual</p>
-            </div>
-            <div className="overflow-hidden border border-outline-variant/10">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-surface-container-lowest font-label text-[10px] tracking-widest text-on-surface-variant uppercase">
-                    <th className="p-6 font-medium">Técnico</th>
-                    <th className="p-6 font-medium">Tipo de Serviço</th>
-                    <th className="p-6 font-medium text-right">Valor Base</th>
-                    <th className="p-6 font-medium text-right">Taxa</th>
-                    <th className="p-6 font-medium text-right text-[#E31B23]">Comissão</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/10 font-body text-sm">
-                  {data.comissoes.length > 0 ? data.comissoes.map((comissao, idx) => (
-                    <tr key={idx} className="bg-surface hover:bg-surface-container-low transition-colors">
-                      <td className="p-6">
-                        <div className="flex items-center space-x-3">
-                           <div className="w-2 h-2 bg-tertiary"></div>
-                           <span className="font-bold tracking-tight text-white">{comissao.tech_name}</span>
-                        </div>
-                      </td>
-                      <td className="p-6 font-label text-xs text-on-surface-variant">{comissao.service_name}</td>
-                      <td className="p-6 text-right font-label tracking-[0.05em] text-white/80">{formatCurrency(comissao.base_price)}</td>
-                      <td className="p-6 text-right font-label text-xs">{comissao.commission_rate}%</td>
-                      <td className="p-6 text-right font-bold text-[#E31B23] tracking-tight">{formatCurrency(comissao.commission_value)}</td>
-                    </tr>
-                  )) : (
-                    <tr className="bg-surface">
-                      <td colSpan="5" className="p-6 text-center text-on-surface-variant font-label text-xs">Nenhuma comissão pendente neste mês.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
           {/* Análise de Fluxo (Bar Chart) */}
           <section>
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4 sm:gap-0">
               <h3 className="font-headline font-bold text-lg tracking-[0.02em] border-l-4 border-tertiary pl-4">ANÁLISE_DE_FLUXO</h3>
               <div className="flex space-x-2 items-center">
                 <span className="w-2 h-2 bg-tertiary"></span>
@@ -228,7 +166,7 @@ export default function Financials() {
                 <span className="font-label text-[10px] text-on-surface-variant uppercase">Saída</span>
               </div>
             </div>
-            <div className="h-80 w-full min-w-0 bg-surface-container-lowest p-8">
+            <div className="h-64 md:h-80 w-full min-w-0 bg-surface-container-lowest p-4 md:p-8">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.flowData} barGap={4} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#8E918F', fontSize: 10, fontFamily: 'monospace' }} />
@@ -242,8 +180,8 @@ export default function Financials() {
         </div>
       </div>
 
-       <div className="mt-16 flex items-center justify-between border-t border-outline-variant/10 pt-8 opacity-50">
-        <div className="flex space-x-12">
+       <div className="mt-8 md:mt-16 flex flex-col md:flex-row items-start md:items-center justify-between border-t border-outline-variant/10 pt-8 opacity-50 gap-6 md:gap-0">
+        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-12">
           <div>
             <p className="font-label text-[10px] tracking-widest uppercase mb-1">Status do Banco de Dados</p>
             <p className="text-[10px] font-bold text-tertiary uppercase">Sincronizado // Cloud-Sec</p>

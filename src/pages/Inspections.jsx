@@ -17,6 +17,8 @@ export default function Inspections() {
   const [diagramType, setDiagramType] = useState('Hatch');
   const [activeMarkerType, setActiveMarkerType] = useState('ARRANHÃO');
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [searchId, setSearchId] = useState('');
+  const [signatureData, setSignatureData] = useState(null);
 
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -72,6 +74,7 @@ export default function Inspections() {
   const setupInspectionState = (data) => {
     setInspectionId(data.id);
     setIsLocked(data.is_locked);
+    setSignatureData(data.signature || null);
 
     if (data.selected_diagram_type) {
       setDiagramType(data.selected_diagram_type);
@@ -206,14 +209,28 @@ export default function Inspections() {
       return;
     }
 
-    const signatureData = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    const signatureDataStr = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
 
     try {
-      await api.post(`/inspections/${inspectionId}/lock`, { signature: signatureData });
+      await api.post(`/inspections/${inspectionId}/lock`, { signature: signatureDataStr });
       setIsLocked(true);
+      setSignatureData(signatureDataStr);
     } catch (error) {
       console.error("Erro ao travar vistoria", error);
       alert(error.message || "Erro ao bloquear");
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchId.trim()) return;
+    try {
+      const existing = await api.get(`/inspections/id/${searchId.trim()}`);
+      if (existing) {
+        setupInspectionState(existing);
+      }
+    } catch (err) {
+      console.error("Erro ao buscar vistoria", err);
+      alert("Vistoria não encontrada");
     }
   };
 
@@ -227,17 +244,28 @@ export default function Inspections() {
   };
 
   return (
-    <div className="pt-12 pb-12 px-12 min-h-screen bg-surface">
+    <div className="py-4 md:py-12 px-4 md:px-12 min-h-screen bg-surface">
       {/* Inspection Header */}
-      <div className="mb-12 flex justify-between items-end border-b-0">
+      <div className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end border-b-0 gap-6 md:gap-0">
         <div className="max-w-2xl">
           <h2 className="font-headline text-5xl font-black tracking-tight text-white mb-4">CHECK-IN DE VEÍCULO</h2>
           <p className="font-body text-white/60 tracking-[0.05em] uppercase text-xs leading-relaxed">
             Realize uma inspeção digital de alta precisão. Documente todas as condições pré-existentes para manter a proteção de responsabilidade e a integridade técnica do serviço.
           </p>
         </div>
-        <div className="text-right">
-          <div className="bg-surface-container-high px-4 py-2 mb-2 inline-block">
+        <div className="w-full md:w-auto text-left md:text-right flex flex-col sm:flex-row items-start sm:items-end gap-4 justify-start md:justify-end">
+          <div className="flex bg-surface-container-high p-2 items-center mb-0 sm:mb-2 border border-surface-container-highest w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="BUSCAR ID..."
+              className="bg-transparent border-none text-white font-label text-sm outline-none px-2 uppercase w-32 focus:ring-0"
+              value={searchId}
+              onChange={(e) => setSearchId(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button onClick={handleSearch} className="material-symbols-outlined text-white/40 hover:text-white px-2 transition-colors">search</button>
+          </div>
+          <div className="bg-surface-container-high px-4 py-2 mb-0 sm:mb-2 inline-block text-left w-full sm:w-auto">
             <span className="font-label text-[10px] text-white/40 block">VISTORIA ID</span>
             <span className="font-label text-sm font-bold text-white tracking-widest uppercase">
               {inspectionId ? inspectionId.split('-')[0] : 'CRIANDO...'}
@@ -246,17 +274,17 @@ export default function Inspections() {
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8">
         {/* Left Column: Damage Mapping */}
-        <div className="col-span-12 lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-8">
           {/* Vehicle Diagram Section */}
-          <section className={`bg-surface-container-high p-10 relative overflow-hidden ${isLocked ? 'opacity-80 pointer-events-none' : ''}`}>
-            <div className="flex justify-between items-start mb-6">
+          <section className={`bg-surface-container-high p-4 sm:p-10 relative overflow-hidden ${isLocked ? 'opacity-80 pointer-events-none' : ''}`}>
+            <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4 sm:gap-0">
               <div>
                 <h3 className="font-label text-xs font-bold tracking-[0.2em] text-primary-container uppercase">// MAPEAMENTO DE SUPERFÍCIE</h3>
                 <p className="text-[11px] font-body text-white/40 mt-1 uppercase tracking-wider">Marque zonas de impacto, marcas de turbilhonamento ou riscos profundos</p>
               </div>
-              <div className="flex gap-4 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
                 {['ARRANHÃO', 'AMASSADO', 'LASCADO'].map(type => (
                   <button
                     key={type}
@@ -280,7 +308,7 @@ export default function Inspections() {
             </div>
 
             {/* Diagram Switcher */}
-            <div className="flex gap-2 mb-8">
+            <div className="flex flex-wrap gap-2 mb-8">
               {['Hatch', 'Sedan', 'Suv', 'Sw'].map(type => (
                 <button
                   key={type}
@@ -322,7 +350,7 @@ export default function Inspections() {
           </section>
 
           {/* Photo Evidence Bento Grid */}
-          <section className="grid grid-cols-3 gap-4">
+          <section className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {imagesUrls.map((url, idx) => (
               <div key={idx} className="col-span-1 bg-surface-container-high aspect-square group relative cursor-pointer overflow-hidden">
                 <img alt={`Evidência ${idx}`} className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" src={`${SERVER_URL}${url}`} />
@@ -352,9 +380,9 @@ export default function Inspections() {
         </div>
 
         {/* Right Column: Checklists & Legal */}
-        <div className="col-span-12 lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-8">
           {/* Identification Section */}
-          <section className="bg-surface-container-high p-8">
+          <section className="bg-surface-container-high p-4 md:p-8">
             <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-8">// IDENTIFICAÇÃO</h3>
             <div className="space-y-6">
               <div className="flex flex-col gap-2">
@@ -393,7 +421,7 @@ export default function Inspections() {
           </section>
 
           {/* Legal Security Section */}
-          <section className="bg-surface-container-high p-8 border-l-4 border-primary-container">
+          <section className="bg-surface-container-high p-4 md:p-8 border-l-4 border-primary-container">
             <h3 className="font-label text-xs font-bold tracking-[0.2em] text-white uppercase mb-4">// SEGURANÇA JURÍDICA</h3>
             <p className="font-body text-[10px] text-white/40 leading-relaxed uppercase tracking-widest mb-6">
               Ao finalizar este check-in, o técnico confirma que todas as condições pré-existentes foram documentadas. A assinatura do cliente reconhece o estado atual do veículo antes dos procedimentos.
@@ -403,9 +431,13 @@ export default function Inspections() {
             <div className="bg-surface-container-lowest h-32 w-full mb-2 relative flex flex-col justify-center overflow-hidden border border-surface-container-highest">
               {isLocked ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-surface-container-lowest z-20">
-                  <span className="font-label text-[14px] text-primary-container font-bold tracking-[0.3em] uppercase opacity-70 rotate-[-10deg] border-2 border-primary-container px-4 py-2">
-                    VISTORIA TRAVADA
-                  </span>
+                  {signatureData ? (
+                    <img src={signatureData} alt="Assinatura" className="h-full object-contain pointer-events-none drop-shadow-md" />
+                  ) : (
+                    <span className="font-label text-[14px] text-primary-container font-bold tracking-[0.3em] uppercase opacity-70 rotate-[-10deg] border-2 border-primary-container px-4 py-2">
+                      VISTORIA TRAVADA
+                    </span>
+                  )}
                 </div>
               ) : (
                 <SignatureCanvas

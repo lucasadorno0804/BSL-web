@@ -116,8 +116,65 @@ export default function ScheduleGrid({ appointments = [], boxes = [], viewDate =
   };
 
   return (
-    <section className="mt-8 overflow-x-auto hide-scrollbar relative min-h-[600px] flex flex-col">
-      <div className="min-w-[1200px] flex-1 flex flex-col relative z-10">
+    <section className="mt-8 relative flex flex-col">
+      {/* MOBILE LIST VIEW */}
+      <div className="md:hidden flex flex-col gap-4 w-full">
+        {appointments.length === 0 ? (
+          <div className="text-center py-12 text-on-surface/30 font-label text-xs tracking-widest uppercase border border-dashed border-surface-container-highest/20">
+            Nenhum serviço agendado para esta data.
+          </div>
+        ) : (
+          appointments.sort((a,b) => new Date(a.start_time) - new Date(b.start_time)).map(app => {
+            const { statusLabel, statusKey, progress } = getDynamicStatusAndProgress(app);
+            const box = boxes.find(b => b.number === app.box_number);
+            const boxName = box ? box.name : `Box ${app.box_number}`;
+            const isFinished = statusKey === 'finished';
+            const isActive = statusKey === 'active';
+            
+            return (
+              <div key={`mobile-${app.id}`} className="bg-surface-container-high p-4 flex flex-col gap-3 relative overflow-hidden border-l-4" style={{ borderColor: isFinished ? '#333' : isActive ? '#E31B23' : '#FFF' }}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="font-label text-[10px] tracking-widest text-on-surface-variant uppercase">{new Date(app.start_time).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})} - {boxName}</span>
+                    <h4 className="font-black text-lg text-white uppercase leading-tight mt-1">{app.vehicle_brand} {app.vehicle_model}</h4>
+                    <span className="font-label text-xs tracking-widest text-primary-container uppercase mt-1 block">{app.service_name}</span>
+                  </div>
+                  <div className="text-right">
+                    <select
+                      value={app.status || 'Agendado'}
+                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                      className="appearance-none bg-surface-container-lowest text-on-surface font-label text-[10px] font-bold uppercase tracking-widest px-2 py-1 border border-surface-container-highest"
+                    >
+                      <option value="Aguardando">AGUARDANDO</option>
+                      <option value="Agendado">AGENDADO</option>
+                      <option value="Em Processamento">EM PROCESSAMENTO</option>
+                      <option value="Finalizado">FINALIZADO</option>
+                    </select>
+                  </div>
+                </div>
+                {isActive && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1 h-1 bg-surface-container-highest">
+                      <div className="h-full bg-primary-container" style={{ width: `${progress}%` }}></div>
+                    </div>
+                    <span className="font-label text-[10px] text-on-surface-variant">{Math.round(progress)}%</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center mt-2 border-t border-surface-container-highest/20 pt-2">
+                  <span className="font-label text-[10px] tracking-widest text-on-surface-variant">CHASSI: {app.plate}</span>
+                  <button onClick={() => handleDelete(app.id)} className="text-error hover:text-white p-1">
+                    <span className="material-symbols-outlined text-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* DESKTOP GRID VIEW */}
+      <div className="hidden md:flex overflow-x-auto hide-scrollbar min-h-[600px] flex-col w-full">
+        <div className="min-w-[1200px] flex-1 flex flex-col relative z-10">
         {/* Tratamento de Erros via Alerta Toast */}
         {errorMessage && (
           <div className="absolute top-0 left-1/2 -translate-x-1/2 z-50 bg-[#E31B23] text-white px-6 py-3 font-label text-xs tracking-widest shadow-2xl flex items-center gap-3 animate-pulse">
@@ -267,6 +324,7 @@ export default function ScheduleGrid({ appointments = [], boxes = [], viewDate =
             </div>
           </div>
         ))}
+        </div>
       </div>
 
     </section>

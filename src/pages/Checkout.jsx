@@ -30,7 +30,7 @@ export default function Checkout() {
       setAppointments(apps);
       
       if (apps.length > 0) {
-        if (preSelectedAppId && apps.some(a => a.id === preSelectedAppId)) {
+        if (preSelectedAppId && apps.some(a => String(a.id) === String(preSelectedAppId))) {
           setSelectedAppId(preSelectedAppId);
         } else {
           setSelectedAppId(apps[0].id);
@@ -107,7 +107,7 @@ export default function Checkout() {
   };
 
   return (
-    <div className="p-12 h-screen overflow-y-auto bg-surface relative">
+    <div className="p-4 md:p-12 h-screen overflow-y-auto bg-surface relative">
       
       {/* Toast Alert */}
       {toast && (
@@ -119,9 +119,9 @@ export default function Checkout() {
         </div>
       )}
 
-      <div className="grid grid-cols-12 gap-8 h-full">
+      <div className="flex flex-col md:grid md:grid-cols-12 gap-4 md:gap-8 min-h-max pb-20 md:pb-0">
         {/* Left Column */}
-        <div className="col-span-8 space-y-8">
+        <div className="md:col-span-8 space-y-4 md:space-y-8">
           
           {/* Seletor de Agendamento Ativo */}
           <section className="bg-surface-container-low p-4 flex items-center justify-between">
@@ -148,9 +148,9 @@ export default function Checkout() {
           </section>
 
           {/* Customer Info Strip */}
-          <section className="bg-surface-container-high p-8 flex justify-between items-center relative overflow-hidden">
+          <section className="bg-surface-container-high p-4 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden gap-4 md:gap-0">
             <div className={`absolute top-0 left-0 w-1 h-full ${selectedApp ? 'bg-primary-container' : 'bg-surface-container-highest'}`}></div>
-            <div className="flex gap-12">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-12 pl-2">
               <div>
                 <label className="block font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-1">Cliente</label>
                 <div className="text-lg font-bold tracking-tight text-white uppercase">{selectedApp?.client_name || '-'}</div>
@@ -164,7 +164,7 @@ export default function Checkout() {
                 <div className="text-lg font-label font-medium text-tertiary tracking-widest uppercase">{selectedApp?.plate || '-'}</div>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-left md:text-right pl-2 md:pl-0">
               <span className="inline-block px-3 py-1 bg-tertiary-container/20 text-tertiary font-label text-[10px] tracking-[0.15em] uppercase border border-tertiary-container/30">
                 {selectedApp ? `Box ${selectedApp.box_number || '-'}` : 'Pendente'}
               </span>
@@ -177,7 +177,7 @@ export default function Checkout() {
               <h2 className="font-headline font-bold text-2xl tracking-tighter uppercase">Serviços Realizados</h2>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               
               {/* Base Service from DB */}
               {selectedApp && (
@@ -268,8 +268,8 @@ export default function Checkout() {
         </div>
 
         {/* Right Column: Billing */}
-        <div className="col-span-4 space-y-8">
-          <div className="bg-surface-container-high p-8 flex flex-col h-full relative">
+        <div className="md:col-span-4 space-y-4 md:space-y-8 h-full">
+          <div className="bg-surface-container-high p-6 md:p-8 flex flex-col h-full relative">
             <div className="flex items-center justify-between mb-8">
               <h2 className="font-headline font-black italic text-xl tracking-widest text-[#E31B23]">FATURAMENTO</h2>
               <span className="material-symbols-outlined text-on-surface-variant">receipt_long</span>

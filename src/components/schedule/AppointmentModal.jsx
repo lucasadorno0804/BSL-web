@@ -9,6 +9,9 @@ export default function AppointmentModal({ isOpen, onClose, boxId, boxName, init
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [selectedServiceId, setSelectedServiceId] = useState('');
+  const [selectedBoxId, setSelectedBoxId] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [boxes, setBoxes] = useState([]);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,6 +22,7 @@ export default function AppointmentModal({ isOpen, onClose, boxId, boxName, init
       .then(data => {
         setClients(data.clients || []);
         setServices(data.services || []);
+        setBoxes(data.boxes || []);
       })
       .catch(err => {
         console.error(err);
@@ -30,16 +34,21 @@ export default function AppointmentModal({ isOpen, onClose, boxId, boxName, init
   useEffect(() => {
     if (isOpen) {
       fetchResources();
+      setSelectedBoxId(boxId || '');
+      const tStr = typeof initialTime === 'number' ? `${String(initialTime).padStart(2, '0')}:00` : initialTime || '08:00';
+      setSelectedTime(tStr);
+    } else {
+      setSelectedClientId('');
+      setSelectedVehicleId('');
+      setSelectedServiceId('');
+      setError('');
     }
-  }, [isOpen, fetchResources]);
+  }, [isOpen, fetchResources, boxId, initialTime]);
 
   if (!isOpen) return null;
 
   const currentClient = clients.find(c => c.id === selectedClientId);
   const currentService = services.find(s => s.id === selectedServiceId);
-  
-  // Date formating fix dummy date to match today + selected initialTime 'HH:mm'
-  const timeStr = typeof initialTime === 'number' ? `${String(initialTime).padStart(2, '0')}:00` : initialTime || '08:00';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,13 +57,13 @@ export default function AppointmentModal({ isOpen, onClose, boxId, boxName, init
 
     // Preparar um Timestamp do dia "selectedDate" + Hora clicada
     const targetDate = new Date(selectedDate);
-    const [hh, mm] = timeStr.split(':');
+    const [hh, mm] = selectedTime.split(':');
     targetDate.setHours(parseInt(hh, 10), parseInt(mm || 0, 10), 0, 0);
 
     const payload = {
       vehicle_id: selectedVehicleId,
       service_id: selectedServiceId,
-      box_number: boxId,
+      box_number: selectedBoxId,
       start_time: targetDate.toISOString()
     };
 
@@ -82,7 +91,7 @@ export default function AppointmentModal({ isOpen, onClose, boxId, boxName, init
           <div>
             <h3 className="text-xl font-black italic tracking-widest text-[#E31B23]">NOVO SERVIÇO</h3>
             <p className="font-label text-[10px] tracking-widest text-on-surface/50 mt-1 uppercase">
-              {boxName} • INÍCIO: {timeStr}
+              AGENDAMENTO
             </p>
           </div>
           <button onClick={onClose} className="text-on-surface/50 hover:text-white transition-colors">
@@ -98,6 +107,34 @@ export default function AppointmentModal({ isOpen, onClose, boxId, boxName, init
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Box e Horário */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-label tracking-widest text-on-surface/50 mb-2">BOX</label>
+              <select 
+                required
+                value={selectedBoxId} 
+                onChange={e => setSelectedBoxId(e.target.value)}
+                className="w-full bg-[#2A2A2A] text-white border-0 py-3 px-4 font-label text-sm focus:ring-1 focus:ring-[#E31B23] focus:outline-none"
+              >
+                <option value="">Selecione o box...</option>
+                {boxes.map(b => (
+                  <option key={b.id} value={b.number}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-label tracking-widest text-on-surface/50 mb-2">HORÁRIO</label>
+              <input 
+                type="time"
+                required
+                value={selectedTime}
+                onChange={e => setSelectedTime(e.target.value)}
+                className="w-full bg-[#2A2A2A] text-white border-0 py-3 px-4 font-label text-sm focus:ring-1 focus:ring-[#E31B23] focus:outline-none"
+              />
+            </div>
+          </div>
+
           {/* Cliente Select */}
           <div>
             <div className="flex justify-between items-center mb-2">

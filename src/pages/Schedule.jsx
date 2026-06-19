@@ -135,11 +135,11 @@ export default function Schedule() {
   const capacityPercent = Math.round((occupiedBoxes / totalBoxes) * 100);
 
   return (
-    <div className="pt-16 pb-12 px-12 min-h-screen bg-surface flex flex-col">
+    <div className="pt-8 md:pt-16 pb-12 px-4 md:px-12 min-h-screen bg-surface flex flex-col">
       {/* Header & Filters Area */}
-      <section className="py-8 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-surface-container-highest/20 mb-8">
+      <section className="py-4 md:py-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-surface-container-highest/20 mb-4 md:mb-8">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter uppercase mb-2">Grade de Serviços</h2>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-2">Grade de Serviços</h2>
           <div className="flex gap-4 items-center">
             <span className="font-label text-[10px] tracking-[0.2em] text-on-surface/40 uppercase">Visão Operacional</span>
             <span className="w-12 h-[1px] bg-primary-container"></span>
@@ -181,9 +181,9 @@ export default function Schedule() {
           </div>
         </div>
         
-        <div className="flex flex-col items-end gap-4">
+        <div className="flex flex-col items-start md:items-end gap-4 w-full md:w-auto">
           {/* Local Search */}
-          <div className="relative group w-64">
+          <div className="relative group w-full md:w-64">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface/30 text-sm">search</span>
             <input 
               type="text"
@@ -194,10 +194,10 @@ export default function Schedule() {
             />
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
             <button 
               onClick={() => setSelectedProf(null)}
-              className={`px-4 py-2 ${!selectedProf ? 'bg-surface-container-high border-l-2 border-primary-container text-on-surface' : 'bg-surface-container-low text-on-surface/50'} text-[10px] font-label tracking-widest active:scale-95 transition-all`}
+              className={`px-4 py-2 ${!selectedProf ? 'bg-surface-container-high border-l-2 border-primary-container text-on-surface' : 'bg-surface-container-low text-on-surface/50'} text-[10px] font-label tracking-widest active:scale-95 transition-all flex-1 md:flex-none text-center`}
             >
               TODA EQUIPE
             </button>
@@ -205,7 +205,7 @@ export default function Schedule() {
               <button 
                 key={p.id}
                 onClick={() => setSelectedProf(p.id)}
-                className={`px-4 py-2 ${selectedProf === p.id ? 'bg-surface-container-high border-l-2 border-primary-container text-on-surface' : 'bg-surface-container-low hover:bg-surface-container-high text-on-surface/50'} text-[10px] font-label tracking-widest active:scale-95 transition-all`}
+                className={`px-4 py-2 ${selectedProf === p.id ? 'bg-surface-container-high border-l-2 border-primary-container text-on-surface' : 'bg-surface-container-low hover:bg-surface-container-high text-on-surface/50'} text-[10px] font-label tracking-widest active:scale-95 transition-all flex-1 md:flex-none text-center`}
               >
                 {p.name.split(' ')[0].toUpperCase()}
               </button>
@@ -226,12 +226,12 @@ export default function Schedule() {
       />
 
       {/* Detailed Status Panel (Bento Style) */}
-      <section className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="col-span-1 md:col-span-2 bg-surface-container-high p-8 flex flex-col justify-between min-h-[300px]">
+      <section className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="col-span-1 md:col-span-2 bg-surface-container-high p-6 md:p-8 flex flex-col justify-between min-h-[200px] md:min-h-[300px]">
           <div>
-            <h3 className="font-label text-xs tracking-[0.2em] text-primary-container uppercase font-bold mb-8">Análise de Capacidade</h3>
+            <h3 className="font-label text-xs tracking-[0.2em] text-primary-container uppercase font-bold mb-4 md:mb-8">Análise de Capacidade</h3>
             <div className="flex items-end gap-1 mb-2">
-              <span className="text-6xl font-black italic tracking-tighter text-on-surface">{occupiedBoxes}</span>
+              <span className="text-5xl md:text-6xl font-black italic tracking-tighter text-on-surface">{occupiedBoxes}</span>
               <span className="text-xl font-bold text-on-surface/30 mb-2">/ {totalBoxes}</span>
             </div>
             <p className="font-label text-sm text-on-surface/60 max-w-xs">
@@ -325,10 +325,10 @@ export default function Schedule() {
       </section>
 
       {/* Contextual FAB */}
-      <div className="fixed bottom-12 right-12 z-50">
+      <div className="fixed bottom-6 right-6 md:bottom-12 md:right-12 z-50">
         <button 
           onClick={() => setServiceModalOpen(true)}
-          className="w-16 h-16 bg-primary-container text-on-primary-container flex items-center justify-center shadow-2xl active:scale-90 transition-all duration-75 hover:bg-[#c2161c]"
+          className="w-14 h-14 md:w-16 md:h-16 bg-primary-container text-on-primary-container rounded-full md:rounded-none flex items-center justify-center shadow-2xl active:scale-90 transition-all duration-75 hover:bg-[#c2161c]"
         >
           <span className="material-symbols-outlined text-3xl">add_task</span>
         </button>
