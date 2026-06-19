@@ -76,10 +76,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       </div>
 
       <div className="mt-auto space-y-1">
-        <a className="flex items-center px-6 py-3 text-on-surface/70 hover:text-white hover:bg-surface-container-high/50 transition-colors group" href="#">
+        <button className="w-full flex items-center px-6 py-3 text-on-surface/70 hover:text-white hover:bg-surface-container-high/50 transition-colors group">
           <span className="material-symbols-outlined mr-4">settings</span>
           <span className="font-label text-sm tracking-wide uppercase">Configurações</span>
-        </a>
+        </button>
       </div>
       <div className="px-6 pt-6 flex items-center justify-between border-t border-surface-container-highest/20 mt-2">
           <div className="flex items-center gap-3">

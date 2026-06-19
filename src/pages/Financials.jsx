@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import ReactMarkdown from 'react-markdown';
 
 export default function Financials() {
   const [data, setData] = useState({
@@ -10,10 +11,15 @@ export default function Financials() {
   
   const [expenseCategory, setExpenseCategory] = useState('PRODUTOS & QUÍMICOS');
   const [expenseAmount, setExpenseAmount] = useState('');
+  const [period, setPeriod] = useState('this_month');
+
+  // AI Module State
+  const [aiReport, setAiReport] = useState('');
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch('https://api-rsbf.onrender.com/api/financial/dashboard');
+      const res = await fetch(`https://api-rsbf.onrender.com/api/financial/dashboard?period=${period}`);
       if (res.ok) {
         const json = await res.json();
         setData(json);
@@ -25,7 +31,35 @@ export default function Financials() {
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [period]);
+
+  const handleDownloadReport = () => {
+    window.open(`https://api-rsbf.onrender.com/api/financial/export?period=${period}`, '_blank');
+  };
+
+  const handleGenerateInsights = async () => {
+    setIsGeneratingReport(true);
+    setAiReport('');
+    try {
+      const res = await fetch(`https://api-rsbf.onrender.com/api/financial/insights`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ period })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setAiReport(json.markdown);
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Erro ao gerar insights.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro de conexão ao comunicar com a IA');
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
 
   const handleExpenseSubmit = async () => {
     const amountNum = Number(expenseAmount.replace(',', '.'));
@@ -69,12 +103,49 @@ export default function Financials() {
     return null;
   };
 
+  const periodLabels = {
+    'this_week': 'Esta Semana',
+    'last_week': 'Sem. Passada',
+    'this_month': 'Este Mês',
+    'this_year': 'Este Ano'
+  };
+
+  const periodAbbr = {
+    'this_week': 'WTD',
+    'last_week': 'L-WTD',
+    'this_month': 'MTD',
+    'this_year': 'YTD'
+  };
+
   return (
     <div className="p-4 md:p-12 min-h-screen bg-surface">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <h1 className="text-2xl font-black text-white tracking-tight uppercase">Financeiro</h1>
+        <div className="flex items-center gap-4">
+          <select 
+            value={period} 
+            onChange={(e) => setPeriod(e.target.value)}
+            className="bg-surface-container-low border border-outline-variant/20 text-white font-label text-xs py-2 px-4 focus:ring-0 appearance-none rounded"
+          >
+            <option value="this_week">Esta Semana</option>
+            <option value="last_week">Semana Anterior</option>
+            <option value="this_month">Este Mês</option>
+            <option value="this_year">Este Ano</option>
+          </select>
+          <button 
+            onClick={handleDownloadReport}
+            className="bg-surface-container-high border border-outline-variant/20 hover:bg-surface-container-highest transition-colors text-white font-label font-bold text-xs py-2 px-4 rounded flex items-center gap-2 uppercase tracking-widest"
+          >
+            <span className="material-symbols-outlined text-[16px]">download</span>
+            Baixar Relatório
+          </button>
+        </div>
+      </div>
+
       {/* Hero Financial Stats */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 mb-8 md:mb-12 border-l border-outline-variant/10">
         <div className="p-6 md:p-8 bg-surface-container-low border-b sm:border-b-0 sm:border-r border-outline-variant/10">
-          <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Receita Total (MTD)</p>
+          <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Receita Total ({periodAbbr[period]})</p>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-black tracking-tight text-white">{formatCurrency(data.kpis.receitaTotal)}</h2>
             <span className={`text-[10px] font-label px-2 py-1 ${Number(data.kpis.variation) >= 0 ? 'text-tertiary bg-tertiary/10' : 'text-[#E31B23] bg-[#E31B23]/10'}`}>
@@ -93,7 +164,7 @@ export default function Financials() {
           <p className="font-label text-[10px] text-on-surface-variant tracking-widest mb-4 uppercase">Despesas Operacionais</p>
           <div className="flex items-end justify-between">
             <h2 className="text-3xl font-black tracking-tight text-white">{formatCurrency(data.kpis.despesas)}</h2>
-            <span className="text-[10px] font-label text-[#E31B23] bg-[#E31B23]/10 px-2 py-1">MTD</span>
+            <span className="text-[10px] font-label text-[#E31B23] bg-[#E31B23]/10 px-2 py-1">{periodAbbr[period]}</span>
           </div>
         </div>
         <div className="p-6 md:p-8 bg-surface-container-high">
@@ -175,6 +246,47 @@ export default function Financials() {
                   <Bar dataKey="saida" fill="#E31B23" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </section>
+
+          {/* AI Strategy Report Section */}
+          <section className="mt-12">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+              <h3 className="font-headline font-bold text-lg tracking-[0.02em] border-l-4 border-[#3b82f6] pl-4 uppercase">Consultoria IA</h3>
+              <button 
+                onClick={handleGenerateInsights}
+                disabled={isGeneratingReport}
+                className="bg-surface-container-high border border-[#3b82f6]/30 hover:border-[#3b82f6]/70 transition-colors text-white font-label font-bold text-xs py-2 px-4 rounded flex items-center gap-2 uppercase tracking-widest disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[16px] text-[#3b82f6]">auto_awesome</span>
+                Gerar Relatório Estratégico
+              </button>
+            </div>
+
+            <div className="bg-surface-container-lowest p-6 md:p-8 min-h-[150px] flex flex-col justify-center border border-surface-container-highest/50">
+              {isGeneratingReport ? (
+                <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                  <div className="w-full max-w-md h-1 bg-surface-container-high overflow-hidden rounded">
+                    <div className="h-full bg-[#3b82f6] animate-pulse shadow-[0_0_15px_#3b82f6] w-1/3 origin-left translate-x-full animate-[scanner_1.5s_ease-in-out_infinite_alternate]"></div>
+                  </div>
+                  <style>{`@keyframes scanner { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }`}</style>
+                  <p className="font-label text-xs tracking-[0.2em] text-[#3b82f6] uppercase animate-pulse">Processando Modelos Financeiros...</p>
+                </div>
+              ) : aiReport ? (
+                <div className="prose prose-invert prose-sm md:prose-base max-w-none 
+                                prose-headings:font-headline prose-headings:tracking-tight 
+                                prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-h3:text-[#3b82f6] 
+                                prose-p:font-label prose-p:text-on-surface/80 prose-p:leading-relaxed
+                                prose-li:font-label prose-li:text-on-surface/80
+                                prose-strong:text-white">
+                  <ReactMarkdown>{aiReport}</ReactMarkdown>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 opacity-30">
+                  <span className="material-symbols-outlined text-4xl mb-4 text-on-surface">analytics</span>
+                  <p className="font-label text-xs tracking-widest uppercase text-center">Nenhum relatório gerado.<br/>Clique no botão acima para analisar o período atual com IA.</p>
+                </div>
+              )}
             </div>
           </section>
         </div>
