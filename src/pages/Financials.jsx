@@ -9,6 +9,12 @@ export default function Financials() {
     flowData: []
   });
   
+  const [categories, setCategories] = useState([
+    'PRODUTOS & QUÍMICOS',
+    'MANUTENÇÃO DE EQUIPAMENTOS',
+    'ALUGUEL & UTILIDADES',
+    'MARKETING'
+  ]);
   const [expenseCategory, setExpenseCategory] = useState('PRODUTOS & QUÍMICOS');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [period, setPeriod] = useState('this_month');
@@ -58,6 +64,17 @@ export default function Financials() {
       alert('Erro de conexão ao comunicar com a IA');
     } finally {
       setIsGeneratingReport(false);
+    }
+  };
+
+  const handleAddCategory = () => {
+    const newCat = window.prompt("Digite o nome da nova categoria:");
+    if (newCat && newCat.trim()) {
+      const uppercaseCat = newCat.trim().toUpperCase();
+      if (!categories.includes(uppercaseCat)) {
+        setCategories([...categories, uppercaseCat]);
+      }
+      setExpenseCategory(uppercaseCat);
     }
   };
 
@@ -185,16 +202,23 @@ export default function Financials() {
             <h3 className="font-headline font-bold text-lg tracking-[0.02em] mb-8 border-l-4 border-[#E31B23] pl-4">LANÇAR_DESPESA</h3>
             <div className="bg-surface-container-lowest p-8 space-y-6">
               <div>
-                <label className="font-label text-[10px] text-on-surface-variant tracking-widest uppercase mb-2 block">Categoria</label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="font-label text-[10px] text-on-surface-variant tracking-widest uppercase block">Categoria</label>
+                  <button 
+                    onClick={handleAddCategory} 
+                    className="font-label text-[10px] text-[#3b82f6] hover:text-[#3b82f6]/80 uppercase tracking-widest transition-colors"
+                  >
+                    + Nova Categoria
+                  </button>
+                </div>
                 <select 
                   className="w-full bg-surface-container-low border-none text-white font-label text-sm py-4 px-4 focus:ring-0 appearance-none"
                   value={expenseCategory}
                   onChange={(e) => setExpenseCategory(e.target.value)}
                 >
-                  <option>PRODUTOS & QUÍMICOS</option>
-                  <option>MANUTENÇÃO DE EQUIPAMENTOS</option>
-                  <option>ALUGUEL & UTILIDADES</option>
-                  <option>MARKETING</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
               </div>
               <div>
