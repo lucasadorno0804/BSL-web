@@ -123,6 +123,20 @@ export default function Inspections() {
     }
   };
 
+  const handleUndoMarker = async (e) => {
+    e.stopPropagation();
+    if (isLocked || !inspectionId || markers.length === 0) return;
+
+    const newMarkers = markers.slice(0, -1);
+    setMarkers(newMarkers);
+
+    try {
+      await api.put(`/inspections/${inspectionId}`, { checklist: newMarkers, diagramType });
+    } catch (error) {
+      console.error("Erro ao desfazer marcador", error);
+    }
+  };
+
   const handleClearMarkers = async (e) => {
     e.stopPropagation();
     if (isLocked || !inspectionId) return;
@@ -209,7 +223,7 @@ export default function Inspections() {
       return;
     }
 
-    const signatureDataStr = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
+    const signatureDataStr = sigCanvas.current.getCanvas().toDataURL('image/png');
 
     try {
       await api.post(`/inspections/${inspectionId}/lock`, { signature: signatureDataStr });
@@ -296,13 +310,22 @@ export default function Inspections() {
                   </button>
                 ))}
                 {!isLocked && markers.length > 0 && (
-                  <button
-                    onClick={handleClearMarkers}
-                    className="ml-2 px-3 py-1.5 font-label text-[10px] tracking-widest text-[#E31B23] hover:bg-[#E31B23]/10 transition-colors uppercase flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">delete</span>
-                    Limpar
-                  </button>
+                  <>
+                    <button
+                      onClick={handleUndoMarker}
+                      className="ml-2 px-3 py-1.5 font-label text-[10px] tracking-widest text-white/60 hover:text-white hover:bg-white/10 transition-colors uppercase flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">undo</span>
+                      Voltar
+                    </button>
+                    <button
+                      onClick={handleClearMarkers}
+                      className="ml-2 px-3 py-1.5 font-label text-[10px] tracking-widest text-[#E31B23] hover:bg-[#E31B23]/10 transition-colors uppercase flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">delete</span>
+                      Limpar
+                    </button>
+                  </>
                 )}
               </div>
             </div>
