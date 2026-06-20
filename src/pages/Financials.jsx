@@ -327,7 +327,7 @@ export default function Financials() {
             <p className="text-[10px] font-bold text-white uppercase">Verificado 100%</p>
           </div>
         </div>
-        <p className="font-label text-[10px] tracking-widest uppercase">Precision Detail Financial Core v1.5.0</p>
+        <p className="font-label text-[10px] tracking-widest uppercase">v1.5.0</p>
       </div>
     </div>
   );

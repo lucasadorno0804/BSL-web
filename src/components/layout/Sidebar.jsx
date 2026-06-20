@@ -39,7 +39,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       <aside className={`flex flex-col py-8 px-0 w-64 h-screen fixed left-0 top-0 border-r border-surface-container-highest/20 bg-[#131313] z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       <div className="px-6 mb-10">
-        <h1 className="text-xl font-bold tracking-tighter text-primary-container">PRECISION OPS</h1>
+        <h1 className="text-xl font-bold tracking-tighter text-primary-container">HubDetail</h1>
         <p className="font-label text-[10px] tracking-[0.05em] text-on-surface/40">V1.0.42</p>
       </div>
       

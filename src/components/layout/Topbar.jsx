@@ -23,7 +23,6 @@ export default function Topbar({ onMenuClick }) {
         >
           <Menu size={24} />
         </button>
-        <span className="text-xl md:text-2xl font-black italic tracking-widest text-[#E31B23]">DETAIL_CORE</span>
         <div className="hidden md:block h-4 w-[1px] bg-surface-container-highest"></div>
         <div className="hidden md:flex items-center gap-4">
           <span className="font-label text-xs tracking-[0.1em] text-on-surface/40">CARGA_BOX_ATIVA:</span>
