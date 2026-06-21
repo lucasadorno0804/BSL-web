@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import SignatureCanvas from 'react-signature-canvas';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { api } from '../services/api';
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -19,6 +20,7 @@ export default function Inspections() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [searchId, setSearchId] = useState('');
   const [signatureData, setSignatureData] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -292,11 +294,31 @@ export default function Inspections() {
         {/* Left Column: Damage Mapping */}
         <div className="lg:col-span-8 space-y-8">
           {/* Vehicle Diagram Section */}
-          <section className={`bg-surface-container-high p-4 sm:p-10 relative overflow-hidden ${isLocked ? 'opacity-80 pointer-events-none' : ''}`}>
+          <section className={`bg-surface-container-high p-4 sm:p-10 relative overflow-hidden transition-all duration-300 ${isLocked ? 'opacity-80 pointer-events-none' : ''} ${isFullscreen ? 'fixed inset-0 z-[100] m-0 bg-[#131313] flex flex-col overflow-y-auto' : ''}`}>
+            {isFullscreen && (
+              <button 
+                onClick={() => setIsFullscreen(false)} 
+                className="absolute top-6 right-6 z-50 p-3 bg-surface-container-lowest rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors shadow-lg"
+                title="Sair da Tela Cheia"
+              >
+                <Minimize2 size={24} />
+              </button>
+            )}
             <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4 sm:gap-0">
-              <div>
-                <h3 className="font-label text-xs font-bold tracking-[0.2em] text-primary-container uppercase">// MAPEAMENTO DE SUPERFÍCIE</h3>
-                <p className="text-[11px] font-body text-white/40 mt-1 uppercase tracking-wider">Marque zonas de impacto, marcas de turbilhonamento ou riscos profundos</p>
+              <div className="flex items-start gap-4">
+                <div>
+                  <h3 className="font-label text-xs font-bold tracking-[0.2em] text-primary-container uppercase">// MAPEAMENTO DE SUPERFÍCIE</h3>
+                  <p className="text-[11px] font-body text-white/40 mt-1 uppercase tracking-wider">Marque zonas de impacto, marcas de turbilhonamento ou riscos profundos</p>
+                </div>
+                {!isFullscreen && (
+                  <button 
+                    onClick={() => setIsFullscreen(true)} 
+                    className="p-2 mt-[-4px] bg-surface-container-lowest rounded-md text-white/50 hover:text-white transition-colors"
+                    title="Tela cheia"
+                  >
+                    <Maximize2 size={18} />
+                  </button>
+                )}
               </div>
               <div className="flex flex-wrap gap-2 items-center">
                 {['ARRANHÃO', 'AMASSADO', 'LASCADO'].map(type => (
@@ -346,7 +368,7 @@ export default function Inspections() {
 
             {/* Diagram Container */}
             <div
-              className="relative w-full aspect-video bg-surface-container-lowest flex items-center justify-center p-4 cursor-crosshair overflow-hidden"
+              className={`relative w-full bg-surface-container-lowest flex items-center justify-center p-4 cursor-crosshair overflow-hidden ${isFullscreen ? 'flex-1 min-h-0 min-h-[60vh]' : 'aspect-video'}`}
               onClick={handleDiagramClick}
               onMouseMove={handleDiagramMouseMove}
             >
