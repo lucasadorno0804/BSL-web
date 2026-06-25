@@ -103,6 +103,25 @@ export default function Financials() {
     }
   };
 
+  const handleDeleteTransaction = async (id) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta movimentação? Essa ação afetará o caixa.')) return;
+    
+    try {
+      const res = await fetch(`https://api-rsbf.onrender.com/api/financial/transaction/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        fetchDashboard();
+      } else {
+        const errorData = await res.json();
+        alert(`Erro ao excluir: ${errorData.error || 'Desconhecido'}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro de conexão ao excluir movimentação');
+    }
+  };
+
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
   };
@@ -242,6 +261,50 @@ export default function Financials() {
               >
                 Confirmar Lançamento
               </button>
+            </div>
+          </section>
+
+          {/* Histórico de Movimentações */}
+          <section className="mt-12">
+            <h3 className="font-headline font-bold text-lg tracking-[0.02em] mb-8 border-l-4 border-on-surface-variant pl-4">HISTÓRICO_DE_MOVIMENTAÇÕES</h3>
+            <div className="bg-surface-container-lowest p-6 max-h-[500px] overflow-y-auto custom-scrollbar space-y-4">
+              {data.transactions && data.transactions.length > 0 ? (
+                data.transactions.map((t) => (
+                  <div key={t.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-surface-container-low border border-outline-variant/10 hover:border-outline-variant/30 transition-colors group">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`w-2 h-2 rounded-full ${t.transaction_type === 'RECEITA' ? 'bg-tertiary' : 'bg-[#E31B23]'}`}></span>
+                        <p className="font-label text-xs tracking-widest uppercase text-on-surface-variant">
+                          {new Date(t.created_at).toLocaleDateString('pt-BR')} - {t.transaction_type}
+                        </p>
+                      </div>
+                      <p className="font-label font-bold text-white uppercase">
+                        {t.transaction_type === 'RECEITA' ? t.service_name || 'Avulso' : t.payment_method || 'Despesa'}
+                      </p>
+                      {t.client_name && (
+                        <p className="font-label text-[10px] text-on-surface-variant uppercase mt-1">{t.client_name}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 sm:mt-0">
+                      <p className={`font-headline font-bold ${t.transaction_type === 'RECEITA' ? 'text-tertiary' : 'text-[#E31B23]'}`}>
+                        {formatCurrency(t.amount)}
+                      </p>
+                      <button 
+                        onClick={() => handleDeleteTransaction(t.id)}
+                        className="text-on-surface-variant hover:text-[#E31B23] transition-colors sm:opacity-0 sm:group-hover:opacity-100 p-2"
+                        title="Excluir movimentação"
+                      >
+                        <span className="material-symbols-outlined text-lg">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center opacity-50">
+                  <span className="material-symbols-outlined text-3xl mb-2">receipt_long</span>
+                  <p className="font-label text-xs uppercase tracking-widest">Nenhuma movimentação</p>
+                </div>
+              )}
             </div>
           </section>
 
