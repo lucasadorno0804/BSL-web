@@ -104,5 +104,27 @@ export const api = {
       throw new Error(error.error || 'Erro ao remover membro da equipe');
     }
     return response.json();
+  },
+
+  getServices: async () => {
+    const response = await fetch(`${apiUrl}/schedule/services`);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao buscar serviços');
+    }
+    return response.json();
+  },
+
+  updateService: async (id, serviceData) => {
+    const response = await fetch(`${apiUrl}/schedule/services/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(serviceData)
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Erro ao atualizar serviço');
+    }
+    return response.json();
   }
 };
